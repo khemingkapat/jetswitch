@@ -64,7 +64,7 @@ This process ensures that no unfinished or broken code ever reaches the main bra
 
   2. Create your new branch. Use a clear, short name that describes the task (e.g., feature/user-login, feature/music-bar-ui).  
   ```bash
-  git checkout \-b feature/your-task-name
+  git checkout -b feature/your-task-name
   ```
 
   * **All of your coding work happens only in this new branch.**
@@ -76,12 +76,12 @@ This process ensures that no unfinished or broken code ever reaches the main bra
   1. Commit your changes frequently with clear, descriptive messages:  
   ```bash
   git add .  
-  git commit \-m "feat: added basic structure for the login screen"
+  git commit -m "feat: added basic structure for the login screen"
   ```
 
   2. Push your branch to GitHub for the first time:  
   ```bash
-  git push \-u origin feature/your-task-name
+  git push -u origin feature/your-task-name
   ```
 
 #### **3\. Finish and Review (The Pull Request)**
