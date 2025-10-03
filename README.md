@@ -1,11 +1,11 @@
-# ** JetSwitch**
+# **JetSwitch**
 
 ## **Project Description**
 
 JetSwitch is a modern music analysis and recommendation platform. Our goal is to **"Unlock your music taste"** by analyzing a user's uploaded song and finding other songs that match their unique style and sound.  
 The application is built on a **microservices architecture** using **React** for the frontend, **Go** for the main backend logic, and a **Python API** for high-performance machine learning similarity search. All services are containerized using Docker for consistent development.
 
-## ** Tech Stack & Setup**
+## **Tech Stack & Setup**
 
 ### **1\. Development Environment**
 
@@ -22,7 +22,7 @@ The application is built on a **microservices architecture** using **React** for
 | **ML Microservice** | Python | Song Similarity Search & Matching Score Calculation |
 | **Database** | PostgreSQL \+ pgvector | Persistent storage for users, content, and song vectors |
 
-## ** Repository Structure**
+## **Repository Structure**
 
 The project uses a **Monorepo** structure. Each service is self-contained in its own folder, making it easier for different teams to work in parallel.  
 ```
@@ -36,7 +36,7 @@ The project uses a **Monorepo** structure. Each service is self-contained in its
 └── README.md             \# This document
 ```
 
-## ** Version Control and Branching Strategy**
+## **Version Control and Branching Strategy**
 
 We use a simple **GitHub Flow** with only two main branch types: main and feature/xxx.  
 **The most important rule is that the main branch must always be stable and ready to deploy.** All new work must be done in a separate feature branch.
@@ -57,14 +57,14 @@ This process ensures that no unfinished or broken code ever reaches the main bra
 * **Goal:** Start a new, clean environment for your work.  
 * **Action:**  
   1. Get the latest stable code from main:  
-  ```
-     git checkout main  
-     git pull origin main
+  ```bash
+  git checkout main  
+  git pull origin main
   ```
 
   2. Create your new branch. Use a clear, short name that describes the task (e.g., feature/user-login, feature/music-bar-ui).  
-  ```
-     git checkout \-b feature/your-task-name
+  ```bash
+  git checkout \-b feature/your-task-name
   ```
 
   * **All of your coding work happens only in this new branch.**
@@ -74,14 +74,14 @@ This process ensures that no unfinished or broken code ever reaches the main bra
 * **Goal:** Save your progress and back up your work to GitHub.  
 * **Action:**  
   1. Commit your changes frequently with clear, descriptive messages:  
-  ```
-     git add .  
-     git commit \-m "feat: added basic structure for the login screen"
+  ```bash
+  git add .  
+  git commit \-m "feat: added basic structure for the login screen"
   ```
 
   2. Push your branch to GitHub for the first time:  
-  ```
-     git push \-u origin feature/your-task-name
+  ```bash
+  git push \-u origin feature/your-task-name
   ```
 
 #### **3\. Finish and Review (The Pull Request)**
