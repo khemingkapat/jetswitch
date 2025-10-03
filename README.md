@@ -92,3 +92,23 @@ This process ensures that no unfinished or broken code ever reaches the main bra
   2. **Target Branch:** Ensure the PR is set to merge your feature/your-task-name **INTO** the **main** branch.  
   3. **Review:** Ask at least one teammate to check your code and confirm it works.  
   4. **Merge:** Once approved, the PR can be merged into main. The feature branch is then deleted.
+
+#### **4\. Delete Done Feature Branch**
+* **Goal:** To clean up the repository, so we won't end up with repository with hundreds of completed feature branch
+* **Action:**
+  1. Checkout to `main` first
+  ```bash
+  git checkout main
+  ```
+  2. Delete `feature/done-feature` branch in local repository
+  ```bash
+  git branch -d feature/done-feature
+  ```
+  or even force delete it by
+  ```bash
+  git branch -D feature/done-feature
+  ```
+  3. Delete `feature/done-feature` branch in remote repository
+  ```bash
+  git push origin --delete feature/done-feature
+  ```
