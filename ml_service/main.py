@@ -1,6 +1,8 @@
-def main():
-    print("Hello from ml-service!")
+from fastapi import FastAPI
+
+app = FastAPI()
 
 
-if __name__ == "__main__":
-    main()
+@app.get("/")
+def read_root():
+    return {"message": "ML Service is running!"}
