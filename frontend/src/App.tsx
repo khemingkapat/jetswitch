@@ -59,7 +59,7 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
-      
+
       {/* Display the message from backend */}
       <div className="card">
         <h3>Go Backend Message:</h3>

@@ -16,7 +16,7 @@ func main() {
 
 	// Middleware
 	app.Use(logger.New())
-	
+
 	// CORS Middleware - allow any localhost
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
