@@ -1,0 +1,44 @@
+root = true
+
+# Default for all files
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JavaScript/TypeScript (Frontend)
+[*.{js,jsx,ts,tsx}]
+indent_style = tab
+tab_width = 4
+
+# JSON files (typically 2 spaces by convention, but you can use tabs)
+[*.json]
+indent_style = tab
+tab_width = 4
+
+# Go files (Go convention is tabs)
+[*.go]
+indent_style = tab
+tab_width = 4
+
+# Python files (PEP 8 requires spaces, but you can override)
+[*.py]
+indent_style = tab
+tab_width = 4
+
+# YAML/Docker files
+[*.{yml,yaml}]
+indent_style = tab
+tab_width = 4
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+indent_style = tab
+tab_width = 4
+
+# Nix files
+[*.nix]
+indent_style = tab
+tab_width = 4
