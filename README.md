@@ -112,3 +112,12 @@ This process ensures that no unfinished or broken code ever reaches the main bra
   ```bash
   git push origin --delete feature/done-feature
   ```
+
+## **Code Formatting**
+
+This project uses tabs with width 4 for indentation. We enforce this with:
+
+- **Frontend (JS/TS)**: Prettier + ESLint
+- **Backend (Go)**: `gofmt` (default)
+- **ML Service (Python)**: Black
+
