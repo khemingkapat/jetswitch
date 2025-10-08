@@ -1,102 +1,66 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Register from './components/Register';
+import Login from './components/Login';
+import AuthCallback from './components/AuthCallback';
+import SelectUserType from './components/SelectUserType';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
-  const [message, setMessage] = useState('')
-  const [mlMessage, setMlMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const [mlLoading, setMlLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [mlError, setMlError] = useState('')
+function Home() {
+	const { user, logout, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    // Fetch message from Go backend
-    fetch('http://localhost:8080')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        return response.json()
-      })
-      .then(data => {
-        setMessage(data.message)
-        setLoading(false)
-      })
-      .catch(err => {
-        setError(err.message)
-        setLoading(false)
-      })
+	return (
+		<div>
+			<h1>Welcome to JetSwitch</h1>
 
-    // Fetch ML message from Go backend /ml endpoint
-    fetch('http://localhost:8080/ml')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        return response.json()
-      })
-      .then(data => {
-        setMlMessage(data.message)
-        setMlLoading(false)
-      })
-      .catch(err => {
-        setMlError(err.message)
-        setMlLoading(false)
-      })
-  }, [])
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-
-      {/* Display the message from backend */}
-      <div className="card">
-        <h3>Go Backend Message:</h3>
-        {loading ? (
-          <p>Loading message...</p>
-        ) : error ? (
-          <p style={{ color: 'red' }}>Error: {error}</p>
-        ) : (
-          <p style={{ fontSize: '1.2em', fontWeight: 'bold' }}>{message}</p>
-        )}
-      </div>
-
-      {/* Display the ML service message */}
-      <div className="card">
-        <h3>ML Service Message:</h3>
-        {mlLoading ? (
-          <p>Loading ML message...</p>
-        ) : mlError ? (
-          <p style={{ color: 'red' }}>Error: {mlError}</p>
-        ) : (
-          <p style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#61dafb' }}>{mlMessage}</p>
-        )}
-      </div>
-
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+			{isAuthenticated ? (
+				<div>
+					{user?.avatar_url && (
+						<img
+							src={user.avatar_url}
+							alt={user.username}
+							style={{
+								width: '80px',
+								height: '80px',
+								borderRadius: '50%',
+								marginBottom: '20px'
+							}}
+						/>
+					)}
+					<p>Hello, <strong>{user?.username}</strong>!</p>
+					<p>Account Type: <strong>{user?.user_type}</strong></p>
+					<p>Auth Provider: <strong>{user?.auth_provider}</strong></p>
+					<button onClick={logout}>Logout</button>
+				</div>
+			) : (
+				<div>
+					<p>Please login or register to continue</p>
+					<Link to="/login">
+						<button style={{ marginRight: '10px' }}>Login</button>
+					</Link>
+					<Link to="/register">
+						<button>Register</button>
+					</Link>
+				</div>
+			)}
+		</div>
+	);
 }
 
-export default App
+function App() {
+	return (
+		<AuthProvider>
+			<BrowserRouter>
+				<Routes>
+					<Route path="/" element={<Home />} />
+					<Route path="/register" element={<Register />} />
+					<Route path="/login" element={<Login />} />
+					<Route path="/auth/callback" element={<AuthCallback />} />
+					<Route path="/select-user-type" element={<SelectUserType />} />
+				</Routes>
+			</BrowserRouter>
+		</AuthProvider>
+	);
+}
+
+export default App;

@@ -2,6 +2,7 @@
 *.test.*
 *.ignore.*
 *.bak.*
+**/.env
 
 
 
