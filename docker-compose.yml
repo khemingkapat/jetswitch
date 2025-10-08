@@ -37,7 +37,7 @@ services:
       - postgres
 
   postgres:
-	image: postgres:latest
+    image: postgres:latest
     container_name: jetswitch_pg
     environment:
       POSTGRES_DB: jetswitch
