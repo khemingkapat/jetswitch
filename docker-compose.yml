@@ -37,7 +37,7 @@ services:
       - postgres
 
   postgres:
-    image: postgres:latest
+	image: postgres:latest
     container_name: jetswitch_pg
     environment:
       POSTGRES_DB: jetswitch
@@ -45,9 +45,11 @@ services:
       POSTGRES_PASSWORD: admin
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql  # Add this line
     ports:
       - "5430:5432"
     restart: unless-stopped
+
 
   pgadmin:
     image: dpage/pgadmin4
