@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import GoogleLoginButton from './GoogleLoginButton';
+import { useNavigate, Link } from 'react-router-dom';
+import GoogleLoginButton from '../components/GoogleLoginButton';
+import FullPageWrapper from '../components/FullPageWrapper'; // Ensure this is imported
+
+// Get the API base URL from the environment
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export default function Register() {
 	const navigate = useNavigate();
-	const { login } = useAuth();
 
 	const [formData, setFormData] = useState({
 		username: '',
 		email: '',
 		password: '',
 		confirm_password: '',
-		user_type: 'listener'
 	});
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -30,7 +31,8 @@ export default function Register() {
 		setLoading(true);
 
 		try {
-			const response = await fetch('http://localhost:8080/api/auth/register', {
+			// POST data without user_type
+			const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -44,8 +46,9 @@ export default function Register() {
 				throw new Error(data.error || 'Registration failed');
 			}
 
-			login(data.token, data.user);
-			navigate('/');
+			// SUCCESS: Now navigate to the role selection page, passing the token
+			navigate(`/select-user-type?token=${data.token}`);
+
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Registration failed');
 		} finally {
@@ -54,14 +57,15 @@ export default function Register() {
 	};
 
 	return (
-		<div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-			<h2>Create Account</h2>
+		// 1. WRAP THE ENTIRE COMPONENT WITH FULLPAGEWRAPPER
+		<FullPageWrapper title="JETSWITCH">
+			<h2 style={{ marginBottom: '25px', color: '#242424' }}>Register</h2> {/* Text inside the card is black */}
 
 			{error && (
 				<div style={{
 					color: 'red',
 					padding: '10px',
-					marginBottom: '10px',
+					marginBottom: '15px',
 					border: '1px solid red',
 					borderRadius: '4px'
 				}}>
@@ -81,7 +85,8 @@ export default function Register() {
 				position: 'relative'
 			}}>
 				<span style={{
-					backgroundColor: '#242424',
+					// Background color is white (from FullPageWrapper card)
+					backgroundColor: 'white',
 					padding: '0 10px',
 					position: 'relative',
 					zIndex: 1
@@ -94,14 +99,15 @@ export default function Register() {
 					left: 0,
 					right: 0,
 					height: '1px',
-					backgroundColor: '#444',
+					backgroundColor: '#ccc',
 					zIndex: 0
 				}} />
 			</div>
 
 			<form onSubmit={handleSubmit}>
+				{/* Username */}
 				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
+					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
 						Username:
 					</label>
 					<input
@@ -112,16 +118,19 @@ export default function Register() {
 						required
 						style={{
 							width: '100%',
-							padding: '8px',
+							padding: '10px',
 							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
+							borderRadius: '6px',
+							border: '1px solid #ccc',
+							backgroundColor: 'white',
+							color: '#242424'
 						}}
 					/>
 				</div>
 
+				{/* Email */}
 				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
+					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
 						Email:
 					</label>
 					<input
@@ -132,16 +141,19 @@ export default function Register() {
 						required
 						style={{
 							width: '100%',
-							padding: '8px',
+							padding: '10px',
 							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
+							borderRadius: '6px',
+							border: '1px solid #ccc',
+							backgroundColor: 'white',
+							color: '#242424'
 						}}
 					/>
 				</div>
 
+				{/* Password */}
 				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
+					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
 						Password:
 					</label>
 					<input
@@ -153,16 +165,19 @@ export default function Register() {
 						minLength={6}
 						style={{
 							width: '100%',
-							padding: '8px',
+							padding: '10px',
 							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
+							borderRadius: '6px',
+							border: '1px solid #ccc',
+							backgroundColor: 'white',
+							color: '#242424'
 						}}
 					/>
 				</div>
 
-				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
+				{/* Confirm Password */}
+				<div style={{ marginBottom: '20px' }}>
+					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
 						Confirm Password:
 					</label>
 					<input
@@ -174,33 +189,14 @@ export default function Register() {
 						minLength={6}
 						style={{
 							width: '100%',
-							padding: '8px',
+							padding: '10px',
 							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
+							borderRadius: '6px',
+							border: '1px solid #ccc',
+							backgroundColor: 'white',
+							color: '#242424'
 						}}
 					/>
-				</div>
-
-				<div style={{ marginBottom: '20px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
-						I am a:
-					</label>
-					<select
-						name="user_type"
-						value={formData.user_type}
-						onChange={handleChange}
-						style={{
-							width: '100%',
-							padding: '8px',
-							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
-						}}
-					>
-						<option value="listener">Listener</option>
-						<option value="artist">Artist</option>
-					</select>
 				</div>
 
 				<button
@@ -208,25 +204,28 @@ export default function Register() {
 					disabled={loading}
 					style={{
 						width: '100%',
-						padding: '10px',
+						padding: '12px',
 						fontSize: '16px',
-						backgroundColor: loading ? '#ccc' : '#646cff',
+						backgroundColor: loading ? '#ccc' : '#FF6C6C',
 						color: 'white',
 						border: 'none',
-						borderRadius: '4px',
-						cursor: loading ? 'not-allowed' : 'pointer'
+						borderRadius: '6px',
+						cursor: loading ? 'not-allowed' : 'pointer',
+						fontWeight: '600',
+						// Ensure button styles are correct
+						...{ fontFamily: 'inherit', background: loading ? '#ccc' : '#FF6C6C' }
 					}}
 				>
-					{loading ? 'Creating Account...' : 'Create Account'}
+					{loading ? 'Creating Account...' : 'Register'}
 				</button>
 			</form>
 
 			<p style={{ marginTop: '20px', textAlign: 'center' }}>
 				Already have an account?{' '}
-				<a href="/login" style={{ color: '#646cff' }}>
+				<Link to="/login" style={{ color: '#FF6C6C', fontWeight: '500' }}>
 					Login here
-				</a>
+				</Link>
 			</p>
-		</div>
+		</FullPageWrapper>
 	);
 }

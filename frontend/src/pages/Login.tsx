@@ -1,7 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GoogleLoginButton from './GoogleLoginButton';
+import GoogleLoginButton from '../components/GoogleLoginButton';
+import FullPageWrapper from '../components/FullPageWrapper';
+
+// Get the API base URL from the environment
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export default function Login() {
 	const navigate = useNavigate();
@@ -27,7 +31,7 @@ export default function Login() {
 		setLoading(true);
 
 		try {
-			const response = await fetch('http://localhost:8080/api/auth/login', {
+			const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -42,7 +46,7 @@ export default function Login() {
 			}
 
 			login(data.token, data.user);
-			navigate('/');
+			navigate('/'); // Redirect to the temporary home route
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Login failed');
 		} finally {
@@ -51,14 +55,14 @@ export default function Login() {
 	};
 
 	return (
-		<div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-			<h2>Login</h2>
+		<FullPageWrapper title="JETSWITCH">
+			<h2 style={{ marginBottom: '25px', color: '#242424' }}>Login</h2>
 
 			{error && (
 				<div style={{
 					color: 'red',
 					padding: '10px',
-					marginBottom: '10px',
+					marginBottom: '15px',
 					border: '1px solid red',
 					borderRadius: '4px'
 				}}>
@@ -78,7 +82,8 @@ export default function Login() {
 				position: 'relative'
 			}}>
 				<span style={{
-					backgroundColor: '#242424',
+					// Background is white from the wrapper, text is black/grey
+					backgroundColor: 'white',
 					padding: '0 10px',
 					position: 'relative',
 					zIndex: 1
@@ -91,14 +96,14 @@ export default function Login() {
 					left: 0,
 					right: 0,
 					height: '1px',
-					backgroundColor: '#444',
+					backgroundColor: '#ccc',
 					zIndex: 0
 				}} />
 			</div>
 
 			<form onSubmit={handleSubmit}>
 				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
+					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
 						Username:
 					</label>
 					<input
@@ -109,16 +114,19 @@ export default function Login() {
 						required
 						style={{
 							width: '100%',
-							padding: '8px',
+							padding: '10px',
 							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
+							borderRadius: '6px',
+							border: '1px solid #ccc',
+							backgroundColor: 'white',
+							color: '#242424'
 						}}
+
 					/>
 				</div>
 
 				<div style={{ marginBottom: '20px' }}>
-					<label style={{ display: 'block', marginBottom: '5px' }}>
+					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
 						Password:
 					</label>
 					<input
@@ -129,10 +137,12 @@ export default function Login() {
 						required
 						style={{
 							width: '100%',
-							padding: '8px',
+							padding: '10px',
 							fontSize: '16px',
-							borderRadius: '4px',
-							border: '1px solid #ccc'
+							borderRadius: '6px',
+							border: '1px solid #ccc',
+							backgroundColor: 'white',
+							color: '#242424'
 						}}
 					/>
 				</div>
@@ -142,13 +152,15 @@ export default function Login() {
 					disabled={loading}
 					style={{
 						width: '100%',
-						padding: '10px',
+						padding: '12px',
 						fontSize: '16px',
-						backgroundColor: loading ? '#ccc' : '#646cff',
+						backgroundColor: loading ? '#ccc' : '#FF6C6C',
 						color: 'white',
 						border: 'none',
-						borderRadius: '4px',
-						cursor: loading ? 'not-allowed' : 'pointer'
+						borderRadius: '6px',
+						cursor: loading ? 'not-allowed' : 'pointer',
+						fontWeight: '600',
+						...{ fontFamily: 'inherit', background: loading ? '#ccc' : '#FF6C6C' }
 					}}
 				>
 					{loading ? 'Logging in...' : 'Login'}
@@ -156,11 +168,12 @@ export default function Login() {
 			</form>
 
 			<p style={{ marginTop: '20px', textAlign: 'center' }}>
-				Don't have an account?{' '}
-				<a href="/register" style={{ color: '#646cff' }}>
+				No account?{' '}
+				<Link to="/register" style={{ color: '#FF6C6C', fontWeight: '500' }}>
 					Register here
-				</a>
+				</Link>
 			</p>
-		</div>
+		</FullPageWrapper>
 	);
 }
+
