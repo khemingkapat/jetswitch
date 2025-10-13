@@ -2,14 +2,14 @@ package services
 
 import (
 	"database/sql"
-	"errors"
-	"time"
+    "errors"
+    "time"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/khemingkapat/jetswitch/backend/config"
-	"github.com/khemingkapat/jetswitch/backend/database"
-	"github.com/khemingkapat/jetswitch/backend/models"
-	"golang.org/x/crypto/bcrypt"
+    "github.com/golang-jwt/jwt/v5"
+    "github.com/khemingkapat/jetswitch/backend/config"
+    "github.com/khemingkapat/jetswitch/backend/database"
+    "github.com/khemingkapat/jetswitch/backend/models"
+    "golang.org/x/crypto/bcrypt"
 )
 
 // HashPassword creates a bcrypt hash of the password
@@ -43,10 +43,10 @@ func RegisterUser(req models.RegisterRequest) (*models.User, error) {
 		return nil, errors.New("passwords do not match")
 	}
 
-	// Validate user type
-	if req.UserType != "listener" && req.UserType != "artist" {
-		return nil, errors.New("invalid user type")
-	}
+	// --- CHANGE START ---
+	// Default user type to a temporary value, as the role is selected later
+	defaultUserType := "listener" // Default to listener for registration
+	// --- CHANGE END ---
 
 	// Hash password
 	hashedPassword, err := HashPassword(req.Password)
@@ -67,7 +67,7 @@ func RegisterUser(req models.RegisterRequest) (*models.User, error) {
 		req.Username,
 		req.Email,
 		hashedPassword,
-		req.UserType,
+		defaultUserType, // Use default user type here
 	).Scan(
 		&user.ID,
 		&user.Username,
@@ -78,6 +78,7 @@ func RegisterUser(req models.RegisterRequest) (*models.User, error) {
 		&user.UpdatedAt,
 	)
 	if err != nil {
+		// Example: Check for duplicate key errors here if desired
 		return nil, err
 	}
 
