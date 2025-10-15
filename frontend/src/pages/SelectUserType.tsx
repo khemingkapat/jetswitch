@@ -66,7 +66,7 @@ export default function SelectUserType() {
 
 			// Log in with updated user type
 			login(token, userData.user);
-			navigate('/');
+			navigate('/home', { replace: true });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to finalize registration.');
 		} finally {
