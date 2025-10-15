@@ -13,7 +13,7 @@ export default function Login() {
 
 	const [formData, setFormData] = useState({
 		username: '',
-		password: ''
+		password: '',
 	});
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export default function Login() {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData({
 			...formData,
-			[e.target.name]: e.target.value
+			[e.target.name]: e.target.value,
 		});
 	};
 
@@ -46,7 +46,7 @@ export default function Login() {
 			}
 
 			login(data.token, data.user);
-			navigate('/'); // Redirect to the temporary home route
+			navigate('/home', { replace: true });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Login failed');
 		} finally {
@@ -59,13 +59,15 @@ export default function Login() {
 			<h2 style={{ marginBottom: '25px', color: '#242424' }}>Login</h2>
 
 			{error && (
-				<div style={{
-					color: 'red',
-					padding: '10px',
-					marginBottom: '15px',
-					border: '1px solid red',
-					borderRadius: '4px'
-				}}>
+				<div
+					style={{
+						color: 'red',
+						padding: '10px',
+						marginBottom: '15px',
+						border: '1px solid red',
+						borderRadius: '4px',
+					}}
+				>
 					{error}
 				</div>
 			)}
@@ -75,30 +77,36 @@ export default function Login() {
 				<GoogleLoginButton />
 			</div>
 
-			<div style={{
-				textAlign: 'center',
-				margin: '20px 0',
-				color: '#888',
-				position: 'relative'
-			}}>
-				<span style={{
-					// Background is white from the wrapper, text is black/grey
-					backgroundColor: 'white',
-					padding: '0 10px',
+			<div
+				style={{
+					textAlign: 'center',
+					margin: '20px 0',
+					color: '#888',
 					position: 'relative',
-					zIndex: 1
-				}}>
+				}}
+			>
+				<span
+					style={{
+						// Background is white from the wrapper, text is black/grey
+						backgroundColor: 'white',
+						padding: '0 10px',
+						position: 'relative',
+						zIndex: 1,
+					}}
+				>
 					OR
 				</span>
-				<div style={{
-					position: 'absolute',
-					top: '50%',
-					left: 0,
-					right: 0,
-					height: '1px',
-					backgroundColor: '#ccc',
-					zIndex: 0
-				}} />
+				<div
+					style={{
+						position: 'absolute',
+						top: '50%',
+						left: 0,
+						right: 0,
+						height: '1px',
+						backgroundColor: '#ccc',
+						zIndex: 0,
+					}}
+				/>
 			</div>
 
 			<form onSubmit={handleSubmit}>
@@ -119,9 +127,8 @@ export default function Login() {
 							borderRadius: '6px',
 							border: '1px solid #ccc',
 							backgroundColor: 'white',
-							color: '#242424'
+							color: '#242424',
 						}}
-
 					/>
 				</div>
 
@@ -142,7 +149,7 @@ export default function Login() {
 							borderRadius: '6px',
 							border: '1px solid #ccc',
 							backgroundColor: 'white',
-							color: '#242424'
+							color: '#242424',
 						}}
 					/>
 				</div>
@@ -160,7 +167,7 @@ export default function Login() {
 						borderRadius: '6px',
 						cursor: loading ? 'not-allowed' : 'pointer',
 						fontWeight: '600',
-						...{ fontFamily: 'inherit', background: loading ? '#ccc' : '#FF6C6C' }
+						...{ fontFamily: 'inherit', background: loading ? '#ccc' : '#FF6C6C' },
 					}}
 				>
 					{loading ? 'Logging in...' : 'Login'}
@@ -176,4 +183,3 @@ export default function Login() {
 		</FullPageWrapper>
 	);
 }
-
