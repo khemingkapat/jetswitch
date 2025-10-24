@@ -3,63 +3,17 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    # uv2nix inputs for Python
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-    };
-    pyproject-build-systems = {
-      url = "github:pyproject-nix/build-system-pkgs";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pyproject-nix.follows = "pyproject-nix";
-      inputs.uv2nix.follows = "uv2nix";
-    };
   };
   outputs =
     {
       self,
       nixpkgs,
       flake-utils,
-      uv2nix,
-      pyproject-nix,
-      pyproject-build-systems,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        python = pkgs.python313;
-
-        # Load uv2nix workspace
-        workspace = uv2nix.lib.workspace.loadWorkspace { workspaceRoot = ./ml_service; };
-
-        overlay = workspace.mkPyprojectOverlay {
-          sourcePreference = "wheel";
-        };
-
-        pythonSet =
-          (pkgs.callPackage pyproject-nix.build.packages {
-            inherit python;
-          }).overrideScope
-            (
-              nixpkgs.lib.composeManyExtensions [
-                pyproject-build-systems.overlays.default
-                overlay
-              ]
-            );
-
-        # Use environment variable for editable root instead of passing path directly
-        editableOverlay = workspace.mkEditablePyprojectOverlay {
-          root = "$REPO_ROOT/ml_service";
-        };
-
-        devPythonSet = pythonSet.overrideScope editableOverlay;
-        virtualenv = devPythonSet.mkVirtualEnv "dev-env" workspace.deps.all;
       in
       {
         devShells = {
@@ -108,28 +62,49 @@
             '';
           };
 
-          # Python shell using uv2nix
+          # Python shell - simplified without uv2nix
           python = pkgs.mkShell {
             name = "ml";
-            packages = [
-              virtualenv
-              pkgs.uv
+            packages = with pkgs; [
+              python313
+              uv
+              # Build tools
+              gcc
+              stdenv.cc.cc.lib # This provides libstdc++
+              # Audio/ML system dependencies
+              ffmpeg
+              libsndfile
+              tbb
+              portaudio
             ];
+
             shellHook = ''
-              # Set REPO_ROOT first
               export REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 
-              # Clear PYTHONPATH to avoid conflicts
-              unset PYTHONPATH
+              # Add system libraries to LD_LIBRARY_PATH
+              export LD_LIBRARY_PATH="${
+                pkgs.lib.makeLibraryPath [
+                  pkgs.stdenv.cc.cc.lib # libstdc++, libgcc_s
+                  pkgs.tbb
+                  pkgs.libsndfile
+                  pkgs.ffmpeg
+                  pkgs.portaudio
+                  pkgs.zlib # often needed by NumPy
+                ]
+              }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
-              # UV environment variables
-              export UV_NO_SYNC=1
-              export UV_PYTHON="${python.interpreter}"
-              export UV_PYTHON_DOWNLOADS="never"
+              # Set up UV to use the Nix Python
+              export UV_PYTHON="${pkgs.python313}/bin/python"
 
-              echo "🐍 Python shell ready (uv2nix dev environment)"
-              echo "   REPO_ROOT: $REPO_ROOT"
-              echo "   Python: ${python.interpreter}"
+              # Auto-activate venv if it exists
+              if [ -f "$REPO_ROOT/ml_service/.venv/bin/activate" ]; then
+                source "$REPO_ROOT/ml_service/.venv/bin/activate"
+                echo "🐍 Python venv activated"
+              fi
+
+              echo "🐍 Python shell ready"
+              echo "   Python: $(python --version)"
+              echo "   UV: $(uv --version)"
             '';
           };
         };
