@@ -76,6 +76,7 @@
               libsndfile
               tbb
               portaudio
+
             ];
 
             shellHook = ''
@@ -89,7 +90,8 @@
                   pkgs.libsndfile
                   pkgs.ffmpeg
                   pkgs.portaudio
-                  pkgs.zlib # often needed by NumPy
+                  pkgs.zlib
+                  # often needed by NumPy
                 ]
               }''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
