@@ -37,14 +37,14 @@ services:
       - postgres
 
   postgres:
-    image: postgres:latest
+    image: ankane/pgvector:latest
     container_name: jetswitch_pg
     environment:
       POSTGRES_DB: jetswitch
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     volumes:
-      - postgres_data:/var/lib/postgresql # <-- CHANGE THIS LINE
+      - postgres_data:/var/lib/postgresql/data  # fixed path!
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5430:5432"
