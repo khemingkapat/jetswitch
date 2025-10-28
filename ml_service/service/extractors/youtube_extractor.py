@@ -5,7 +5,7 @@ import os
 import numpy as np
 from typing import List, Dict
 
-from repositories.vector_repositories import VectorRepository
+from repositories.vector_repository import VectorRepository
 
 
 class MusicAnalysisService:
