@@ -22,6 +22,11 @@ Main entry point for the music analysis service.
 Uses dependency injection to easily swap between mock and real database.
 """
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 import numpy as np
 from service.extractors.youtube_extractor import MusicAnalysisService
 from repositories.vector_repository import VectorRepository
@@ -40,13 +45,17 @@ from repositories.pgvector_repository import (
 # The dimension of your feature vector is required by PGVectorRepository
 # You should update this number (e.g., 512, 1024, etc.) to match your actual model output.
 FEATURE_DIMENSION = 27  # <<< ADJUST THIS NUMBER!
+DB_DSN = os.environ.get(
+    "DATABASE_DSN",
+    "postgresql://admin:admin@localhost:5430/jetswitch",  # <-- This is the default/fallback value
+)
 
 # For NOW: Use mock repository (no database needed!)
 # repository: VectorRepository = MockVectorRepository()
 
 # For LATER: When database is ready, uncomment and use this instead:
 repository: VectorRepository = PGVectorRepository(
-    dsn="postgresql://admin:admin@localhost:5430/jetswitch",
+    dsn=DB_DSN,
     dim=FEATURE_DIMENSION,
 )
 
