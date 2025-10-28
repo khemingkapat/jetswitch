@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- Users table
 CREATE TABLE IF NOT EXISTS users (
     id serial PRIMARY KEY,
