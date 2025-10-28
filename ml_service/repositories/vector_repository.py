@@ -26,6 +26,11 @@ class VectorRepository(ABC):
         """Get features for a specific track."""
         pass
 
+    @abstractmethod
+    def list_all_data(self) -> List[Dict]:
+        """Lists all stored track_id and metadata."""
+        pass
+
 
 class MockVectorRepository(VectorRepository):
     """

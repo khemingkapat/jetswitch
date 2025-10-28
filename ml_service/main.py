@@ -24,7 +24,7 @@ Uses dependency injection to easily swap between mock and real database.
 
 import numpy as np
 from service.extractors.youtube_extractor import MusicAnalysisService
-from repositories.vector_repository import MockVectorRepository, VectorRepository
+from repositories.vector_repository import VectorRepository
 
 # 1. IMPORT THE PGVECTOR REPOSITORY
 from repositories.pgvector_repository import (
@@ -159,35 +159,36 @@ def interactive_mode():
                         # (1.0 + distance) / 2.0 or just the distance.
                         # For simplicity, we'll show the negative distance.
                         print(f"{i}. {track['metadata'].get('title', 'N/A')}")
-                        print(f"    Track ID: {track['track_id']}")
-                        print(
-                            f"    Artist: {track['metadata'].get('artist', 'Unknown')}"
-                        )
+                        print(f"\tTrack ID: {track['track_id']}")
+                        print(f"\tArtist: {track['metadata'].get('artist', 'Unknown')}")
                         # Display as a positive score for better user experience
                         similarity_score = track["distance"]
-                        print(f"    Similarity (Cosine): {similarity_score:.3f}")
-                        print(f"    URL: {track['metadata'].get('youtube_url', 'N/A')}")
+                        print(f"\tSimilarity (Cosine): {similarity_score:.3f}")
+                        print(f"\tURL: {track['metadata'].get('youtube_url', 'N/A')}")
                         print()
             except Exception as e:
                 print(f"\n❌ Error: {e}")
 
         elif choice == "3":
-            # Only works with MockVectorRepository
-            if isinstance(repository, MockVectorRepository):
-                if not repository.storage:
+            try:
+                stored_data = repository.list_all_data()
+                if not stored_data:
                     print("\n📭 No tracks stored yet")
                 else:
-                    print(f"\n📚 Stored tracks ({len(repository.storage)}):")
+                    print(f"\n📚 Stored tracks ({len(stored_data)}):")
                     print("-" * 60)
-                    for track_id, data in repository.storage.items():
+                    for data in stored_data:
+                        track_id = data["track_id"]
                         metadata = data["metadata"]
                         print(f"ID: {track_id}")
                         print(f"Title: {metadata.get('title', 'Unknown')}")
                         print(f"Artist: {metadata.get('artist', 'Unknown')}")
                         print(f"URL: {metadata.get('youtube_url', 'N/A')}")
                         print()
-            else:
-                print("\n⚠️ View stored tracks only available with MockVectorRepository")
+            except AttributeError:
+                print(
+                    "\n⚠️ Current repository type does not have a list_all_data method."
+                )
 
         elif choice == "4":
             print("\n👋 Goodbye!")

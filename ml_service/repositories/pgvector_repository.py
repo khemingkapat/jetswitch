@@ -78,3 +78,13 @@ class PGVectorRepository(VectorRepository):
             if row:
                 return np.array(row[0])
         return None
+
+    def list_all_data(self) -> List[Dict]:
+        """Lists all stored track_id and metadata."""
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT track_id, metadata FROM music_features ORDER BY track_id;"
+            )
+            rows = cur.fetchall()
+
+        return [{"track_id": row[0], "metadata": row[1]} for row in rows]
