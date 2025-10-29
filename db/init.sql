@@ -22,74 +22,74 @@ CREATE INDEX idx_users_google_id ON users (google_id);
 
 -- SONGS Table
 CREATE TABLE SONGS (
-  id SERIAL PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  artist_name VARCHAR(255) NOT NULL,
-  release_date DATE NULL,
-  url TEXT NOT NULL,
-  song_feature VECTOR NOT NULL, -- Requires a vector extension like pgvector
-  source_platform VARCHAR(50) CHECK (source_platform IN ('spotify', 'apple_music', 'youtube', 'other')),
-  added_by INTEGER REFERENCES USERS(id) ON DELETE SET NULL,
-  added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id serial PRIMARY KEY,
+    title varchar(255) NOT NULL,
+    artist_name varchar(255) NOT NULL,
+    release_date date NULL,
+    url text NOT NULL,
+    song_feature VECTOR NOT NULL, -- Requires a vector extension like pgvector
+    source_platform varchar(50) CHECK (source_platform IN ('spotify', 'apple_music', 'youtube', 'other')),
+    added_by integer REFERENCES USERS (id) ON DELETE SET NULL,
+    added_at timestamp with time zone DEFAULT NOW()
 );
 
 -- PLAYLISTS Table
 CREATE TABLE PLAYLISTS (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  description TEXT NULL,
-  owner_id INTEGER NOT NULL REFERENCES USERS(id) ON DELETE CASCADE,
-  privacy VARCHAR(50) DEFAULT 'private' CHECK (privacy IN ('public', 'private')),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id serial PRIMARY KEY,
+    name varchar(255) NOT NULL,
+    description text NULL,
+    owner_id integer NOT NULL REFERENCES USERS (id) ON DELETE CASCADE,
+    privacy varchar(50) DEFAULT 'private' CHECK (privacy IN ('public', 'private')),
+    created_at timestamp with time zone DEFAULT NOW(),
+    updated_at timestamp with time zone DEFAULT NOW()
 );
 
 -- TAGS Table
 CREATE TABLE TAGS (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(100) UNIQUE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id serial PRIMARY KEY,
+    name varchar(100) UNIQUE NOT NULL,
+    created_at timestamp with time zone DEFAULT NOW()
 );
 
 -- CONTACT_INFO Table
 CREATE TABLE CONTACT_INFO (
-  contact_id SERIAL PRIMARY KEY,
-  contact_type VARCHAR(100), -- e.g., 'Phone', 'Email', 'Social'
-  contact_info VARCHAR(255) NOT NULL
+    contact_id serial PRIMARY KEY,
+    contact_type varchar(100), -- e.g., 'Phone', 'Email', 'Social'
+    contact_info varchar(255) NOT NULL
 );
 
 -- SEARCH_HISTORY Table
 CREATE TABLE SEARCH_HISTORY (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER NOT NULL REFERENCES USERS(id) ON DELETE CASCADE,
-  search_type VARCHAR(50) CHECK (search_type IN ('track_link', 'lyrics', 'hummed_audio', 'tags', 'other')),
-  query_content TEXT NULL,
-  query_song_id INTEGER NULL REFERENCES SONGS(id) ON DELETE SET NULL,
-  result_song_ids JSONB, -- Stores an array of song IDs (as INTEGER)
-  searched_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    id serial PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES USERS (id) ON DELETE CASCADE,
+    search_type varchar(50) CHECK (search_type IN ('track_link', 'lyrics', 'hummed_audio', 'tags', 'other')),
+    query_content text NULL,
+    query_song_id integer NULL REFERENCES SONGS (id) ON DELETE SET NULL,
+    result_song_ids jsonb, -- Stores an array of song IDs (as INTEGER)
+    searched_at timestamp with time zone DEFAULT NOW()
 );
 
 -- CONTACT Table (Join table for USERS and CONTACT_INFO)
 CREATE TABLE CONTACT (
-  user_id INTEGER NOT NULL REFERENCES USERS(id) ON DELETE CASCADE,
-  contact_id INTEGER NOT NULL REFERENCES CONTACT_INFO(contact_id) ON DELETE CASCADE,
-  PRIMARY KEY (user_id, contact_id)
+    user_id integer NOT NULL REFERENCES USERS (id) ON DELETE CASCADE,
+    contact_id integer NOT NULL REFERENCES CONTACT_INFO (contact_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, contact_id)
 );
 
 -- SONG_TAGS (Many-to-Many Join Table)
 CREATE TABLE SONG_TAGS (
-  song_id INTEGER NOT NULL REFERENCES SONGS(id) ON DELETE CASCADE,
-  tag_id INTEGER NOT NULL REFERENCES TAGS(id) ON DELETE CASCADE,
-  tagged_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  PRIMARY KEY (song_id, tag_id)
+    song_id integer NOT NULL REFERENCES SONGS (id) ON DELETE CASCADE,
+    tag_id integer NOT NULL REFERENCES TAGS (id) ON DELETE CASCADE,
+    tagged_at timestamp with time zone DEFAULT NOW(),
+    PRIMARY KEY (song_id, tag_id)
 );
 
 -- PLAYLIST_SONGS (Many-to-Many Join Table with Ordering)
 CREATE TABLE PLAYLIST_SONGS (
-  playlist_id INTEGER NOT NULL REFERENCES PLAYLISTS(id) ON DELETE CASCADE,
-  song_id INTEGER NOT NULL REFERENCES SONGS(id) ON DELETE CASCADE,
-  "position" INTEGER NOT NULL,
-  added_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  PRIMARY KEY (playlist_id, song_id)
-  -- UNIQUE (playlist_id, "position") -- Consider adding this constraint
+    playlist_id integer NOT NULL REFERENCES PLAYLISTS (id) ON DELETE CASCADE,
+    song_id integer NOT NULL REFERENCES SONGS (id) ON DELETE CASCADE,
+    "position" integer NOT NULL,
+    added_at timestamp with time zone DEFAULT NOW(),
+    PRIMARY KEY (playlist_id, song_id)
+    -- UNIQUE (playlist_id, "position") -- Consider adding this constraint
 );
