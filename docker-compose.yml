@@ -59,10 +59,14 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "8081:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
     restart: unless-stopped
 volumes:
   postgres_data:
+  pgadmin_data:
+    external: false
 
 
