@@ -2,6 +2,11 @@ FROM python:3.13-slim AS base
 
 WORKDIR /app
 
+# Install ffmpeg and basic utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Install uv
 RUN pip install --no-cache-dir uv
 
