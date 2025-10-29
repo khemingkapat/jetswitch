@@ -1,8 +1,7 @@
 import numpy as np
 import psycopg2
-from psycopg2.extras import Json
 from typing import List, Dict, Optional
-from .vector_repository import VectorRepository  # adjust import path
+from .vector_repository import VectorRepository
 
 
 class PGVectorRepository(VectorRepository):
@@ -13,46 +12,76 @@ class PGVectorRepository(VectorRepository):
         """
         self.dsn = dsn
         self.dim = dim
-        self._ensure_table()
+        self._ensure_extension()
 
     def _connect(self):
         return psycopg2.connect(self.dsn)
 
-    def _ensure_table(self):
+    def _ensure_extension(self):
+        """Ensure that pgvector extension is available."""
         with self._connect() as conn, conn.cursor() as cur:
-            cur.execute(
-                f"""
-                CREATE TABLE IF NOT EXISTS music_features (
-                    track_id TEXT PRIMARY KEY,
-                    features VECTOR({self.dim}),
-                    metadata JSONB
-                );
-                """
-            )
+            cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             conn.commit()
 
     def store_features(
-        self, track_id: str, features: np.ndarray, metadata: dict
+        self,
+        title: str,
+        artist_name: str,
+        url: str,
+        song_feature: np.ndarray,
+        source_platform: str,
+        added_by: Optional[int] = None,
+        release_date: Optional[str] = None,
     ) -> None:
+        """
+        Insert or update a song record in the songs table.
+
+        - title, artist_name, url: basic song info
+        - song_feature: np.ndarray representing feature vector
+        - source_platform: 'spotify', 'apple_music', etc.
+        - added_by: user_id who added the song (optional)
+        - release_date: string like '2024-05-10' (optional)
+        """
+        if song_feature.shape[0] != self.dim:
+            raise ValueError(f"Feature vector must have dimension {self.dim}")
+
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO music_features (track_id, features, metadata)
-                VALUES (%s, %s, %s)
-                ON CONFLICT (track_id)
-                DO UPDATE SET features = EXCLUDED.features, metadata = EXCLUDED.metadata;
+                INSERT INTO songs (title, artist_name, release_date, url, song_feature, source_platform, added_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (url)
+                DO UPDATE SET
+                    title = EXCLUDED.title,
+                    artist_name = EXCLUDED.artist_name,
+                    release_date = EXCLUDED.release_date,
+                    song_feature = EXCLUDED.song_feature,
+                    source_platform = EXCLUDED.source_platform,
+                    added_by = EXCLUDED.added_by;
                 """,
-                (track_id, features.tolist(), Json(metadata)),
+                (
+                    title,
+                    artist_name,
+                    release_date,
+                    url,
+                    song_feature.tolist(),
+                    source_platform,
+                    added_by,
+                ),
             )
             conn.commit()
-        print(f"✅ Stored features for {track_id} in PostgreSQL")
+        print(f"✅ Stored or updated song: {title} by {artist_name}")
 
     def find_similar(self, features: np.ndarray, limit: int = 10) -> List[Dict]:
+        """Find similar songs by vector distance."""
+        if features.shape[0] != self.dim:
+            raise ValueError(f"Query vector must have dimension {self.dim}")
+
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
-                """
-                SELECT track_id, metadata, (features <-> %s::vector) AS distance
-                FROM music_features
+                f"""
+                SELECT id, title, artist_name, url, source_platform, (song_feature <-> %s::vector) AS distance
+                FROM songs
                 ORDER BY distance ASC
                 LIMIT %s;
                 """,
@@ -62,29 +91,46 @@ class PGVectorRepository(VectorRepository):
 
         return [
             {
-                "track_id": row[0],
-                "metadata": row[1],
-                "distance": float(row[2]),
+                "id": row[0],
+                "title": row[1],
+                "artist_name": row[2],
+                "url": row[3],
+                "source_platform": row[4],
+                "distance": float(row[5]),
             }
             for row in rows
         ]
 
-    def get_features(self, track_id: str) -> Optional[np.ndarray]:
+    def get_features(self, song_id: int) -> Optional[np.ndarray]:
+        """Retrieve the feature vector for a given song ID."""
         with self._connect() as conn, conn.cursor() as cur:
-            cur.execute(
-                "SELECT features FROM music_features WHERE track_id = %s;", (track_id,)
-            )
+            cur.execute("SELECT song_feature FROM songs WHERE id = %s;", (song_id,))
             row = cur.fetchone()
             if row:
                 return np.array(row[0])
         return None
 
-    def list_all_data(self) -> List[Dict]:
-        """Lists all stored track_id and metadata."""
+    def list_all_songs(self) -> List[Dict]:
+        """List all songs with their metadata (excluding vector)."""
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
-                "SELECT track_id, metadata FROM music_features ORDER BY track_id;"
+                """
+                SELECT id, title, artist_name, url, source_platform, added_by, added_at
+                FROM songs
+                ORDER BY id;
+                """
             )
             rows = cur.fetchall()
 
-        return [{"track_id": row[0], "metadata": row[1]} for row in rows]
+        return [
+            {
+                "id": row[0],
+                "title": row[1],
+                "artist_name": row[2],
+                "url": row[3],
+                "source_platform": row[4],
+                "added_by": row[5],
+                "added_at": row[6],
+            }
+            for row in rows
+        ]
