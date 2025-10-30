@@ -1,38 +1,33 @@
+import os
 import yt_dlp
 import librosa
 import tempfile
-import os
 import numpy as np
 from typing import Optional
-from repositories.vector_repository import VectorRepository
+from src.repositories.vector_repository import VectorRepository
 from src.models import SongData, SongResult, SimilarSongResult
-
-
-# Pydantic models for service layer
 
 
 class MusicAnalysisService:
     """
-    Service layer - ALL business logic here.
-    Repository is ONLY used internally by this service.
-    FastAPI should NEVER access repository directly!
+    Service layer — all business logic resides here.
+    The repository is used internally; FastAPI should never access it directly.
     """
 
     def __init__(self, repository: VectorRepository):
-        self.repository = repository  # Private - only used internally
+        self.repository = repository  # Private – used only within this service
 
     def analyze_and_store(self, song_data: SongData) -> SongResult:
         """
-        Analyze a song from URL and store it.
-        Returns: Stored song with ID
-
-        This method handles the entire workflow internally.
+        Analyze a song from a URL and store it.
+        Returns: The stored song as a SongResult object.
         """
         audio_path = None
         try:
             # Step 1: Download and extract features
             audio_path = self._download_audio(song_data.url)
             features = self._extract_features(audio_path)
+            print("✅ Analyzed song features")
 
             # Step 2: Store in repository
             self.repository.store_features(
@@ -44,8 +39,9 @@ class MusicAnalysisService:
                 added_by=song_data.added_by,
                 release_date=song_data.release_date,
             )
+            print("💾 Stored in repository")
 
-            # Step 3: Get the stored song and return
+            # Step 3: Retrieve stored song
             songs = self.repository.list_all_songs()
             last_song = songs[-1] if songs else None
 
@@ -59,42 +55,46 @@ class MusicAnalysisService:
                 os.remove(audio_path)
 
     def find_similar_by_id(
-        self, song_id: int, limit: int = 10, exclude_self: bool = True
+        self,
+        song_id: int,
+        limit: int = 10,
+        exclude_self: bool = True,
     ) -> list[SimilarSongResult]:
         """
         Find similar songs by song ID.
-        Returns: List of similar songs with distance scores
-
-        This encapsulates the entire similarity search workflow.
+        Returns: A list of similar songs with distance scores.
         """
-        # Get features from repository
+        # Step 1: Retrieve features
         features = self.repository.get_features(song_id)
         if features is None:
             raise ValueError(f"Song with ID {song_id} not found")
 
-        # Find similar songs
-        similar = self.repository.find_similar(
+        # Step 2: Find similar songs
+        similar = self.repository.find_similars(
             features=features,
             limit=limit + 1 if exclude_self else limit,
             metric="cosine",
             exclude_id=song_id if exclude_self else None,
         )
 
-        # Convert to Pydantic models
+        # Step 3: Optionally filter out the song itself
+        if exclude_self:
+            similar = [s for s in similar if s["id"] != song_id]
+
         return [SimilarSongResult(**song) for song in similar]
 
     def list_all_songs(self) -> list[SongResult]:
         """
-        Get all songs from the repository.
-        Returns: List of all stored songs
+        Retrieve all songs from the repository.
+        Returns: List of SongResult objects.
         """
         songs = self.repository.list_all_songs()
         return [SongResult(**song) for song in songs]
 
     def get_song_by_id(self, song_id: int) -> Optional[SongResult]:
         """
-        Get a specific song by ID.
-        Returns: Song or None if not found
+        Retrieve a specific song by ID.
+        Returns: SongResult or None if not found.
         """
         songs = self.repository.list_all_songs()
         song = next((s for s in songs if s["id"] == song_id), None)
@@ -105,7 +105,7 @@ class MusicAnalysisService:
     # ============================================
 
     def _download_audio(self, url: str) -> str:
-        """Download audio from URL."""
+        """Download audio from a given URL using yt_dlp."""
         tempdir = tempfile.mkdtemp()
         output_path = os.path.join(tempdir, "%(id)s.%(ext)s")
 
@@ -128,7 +128,7 @@ class MusicAnalysisService:
             return os.path.join(tempdir, f"{info['id']}.wav")
 
     def _extract_features(self, audio_path: str) -> np.ndarray:
-        """Extract audio features using librosa."""
+        """Extract normalized audio features using librosa."""
         y, sr = librosa.load(audio_path, sr=None)
 
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
@@ -155,5 +155,4 @@ class MusicAnalysisService:
 
         # Normalize for cosine similarity
         features = features / (np.linalg.norm(features) + 1e-8)
-
         return features
