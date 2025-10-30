@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
 
@@ -22,7 +23,7 @@ class SongResult(BaseModel):
     url: str
     source_platform: str
     added_by: Optional[int]
-    added_at: Optional[str]
+    added_at: Optional[datetime]
 
 
 class SimilarSongResult(BaseModel):
