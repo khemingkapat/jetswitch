@@ -29,6 +29,7 @@ class VectorRepository(ABC):
         features: np.ndarray,
         limit: int = 10,
         metric: str = "cosine",
+        exclude_id: Optional[int] = None,
     ) -> Optional[List[Dict]]:
         """Find similar tracks using vector similarity."""
         pass

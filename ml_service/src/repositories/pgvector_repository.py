@@ -78,6 +78,7 @@ class PGVectorRepository(VectorRepository):
         features: np.ndarray,
         limit: int = 10,
         metric: str = "cosine",
+        exclude_id=Optional[int],
     ) -> Optional[List[Dict]]:
         """Find similar songs by vector distance."""
         if features.shape[0] != self.dim:
@@ -86,6 +87,7 @@ class PGVectorRepository(VectorRepository):
         operators = {"cosine": "<=>", "l2": "<->", "inner_product": "<#>"}
         operator = operators.get(metric, "<=>")
 
+        where_clause = "WHERE id != %s" if exclude_id else ""
         params = [features.tolist(), limit]
 
         with self._connect() as conn, conn.cursor() as cur:
@@ -94,6 +96,7 @@ class PGVectorRepository(VectorRepository):
                 SELECT id, title, artist_name, url, source_platform,
                        (song_feature {operator} %s::vector) AS distance
                 FROM songs
+				{where_clause}
                 ORDER BY distance ASC
                 LIMIT %s;
                 """,
