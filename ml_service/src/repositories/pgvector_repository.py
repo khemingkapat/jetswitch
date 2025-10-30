@@ -88,7 +88,6 @@ class PGVectorRepository(VectorRepository):
         operator = operators.get(metric, "<=>")
 
         where_clause = "WHERE id != %s" if exclude_id else ""
-        params = [features.tolist(), limit]
 
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
@@ -100,7 +99,7 @@ class PGVectorRepository(VectorRepository):
                 ORDER BY distance ASC
                 LIMIT %s;
                 """,
-                params,
+                (features.tolist(), exclude_id, limit),
             )
             rows = cur.fetchall()
 
@@ -124,8 +123,11 @@ class PGVectorRepository(VectorRepository):
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute("SELECT song_feature FROM songs WHERE id = %s;", (song_id,))
             row = cur.fetchone()
-            if row:
-                return np.array(row[0])
+            if row and row[0]:
+                features_string = row[0]
+                cleaned_string = features_string.strip("[]")
+                result = np.fromstring(cleaned_string, sep=",")
+                return result
         return None
 
     def list_all_songs(self) -> List[Dict]:
