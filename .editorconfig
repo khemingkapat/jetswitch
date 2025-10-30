@@ -23,10 +23,11 @@ indent_style = tab
 tab_width = 4
 
 # Python files (PEP 8 requires spaces, but you can override)
+# Python files (PEP 8 standard is 4 spaces)
 [*.py]
-indent_style = tab
+indent_style = space
+indent_size = 4
 tab_width = 4
-
 # YAML/Docker files
 [*.{yml,yaml}]
 indent_style = tab
