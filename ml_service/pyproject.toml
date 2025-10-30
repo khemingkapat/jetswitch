@@ -17,3 +17,13 @@ dependencies = [
     "uvicorn>=0.37.0",
     "yt-dlp>=2025.10.22",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = [
+    "extractors",
+    "models",
+    "repositories"
+]
+
+

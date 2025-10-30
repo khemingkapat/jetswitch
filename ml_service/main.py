@@ -1,6 +1,7 @@
 """
-Main entry point for the music analysis service.
-FastAPI version with dependency injection for repository (mock or PostgreSQL).
+FastAPI layer - ONLY handles HTTP concerns.
+All business logic delegated to MusicAnalysisService.
+Repository is NEVER accessed directly from here!
 """
 
 from fastapi import FastAPI, HTTPException, Query
@@ -10,34 +11,32 @@ from dotenv import load_dotenv
 from typing import List, Optional
 import os
 
-# ---------------------------------------------------------------------------
-# ENV & CONFIG
-# ---------------------------------------------------------------------------
 load_dotenv()
 
-from service.extractors.youtube_extractor import MusicAnalysisService
-from repositories.vector_repository import VectorRepository
-from repositories.pgvector_repository import PGVectorRepository
+from src.extractors.youtube_extractor import (
+    MusicAnalysisService,
+)
+from src.repositories.pgvector_repository import PGVectorRepository
+from src.models import (
+    SongData,
+    SongResult,
+    SimilarSongResult,
+)
 
-# from repositories.mock_vector_repository import MockVectorRepository  # optional
+# ============================================
+# Setup
+# ============================================
 
-FEATURE_DIMENSION = 27  # Adjust to match your model
+FEATURE_DIMENSION = 27
 DB_DSN = os.environ.get(
     "DATABASE_DSN",
     "postgresql://admin:admin@localhost:5430/jetswitch",
 )
 
-print(DB_DSN)
-
-# Choose your repository
-repository: VectorRepository = PGVectorRepository(dsn=DB_DSN, dim=FEATURE_DIMENSION)
-# repository: VectorRepository = MockVectorRepository()  # Use for local testing
-
+# Initialize repository and service
+repository = PGVectorRepository(dsn=DB_DSN, dim=FEATURE_DIMENSION)
 music_service = MusicAnalysisService(repository)
 
-# ---------------------------------------------------------------------------
-# FASTAPI APP SETUP
-# ---------------------------------------------------------------------------
 app = FastAPI(title="JetSwitch Music Analysis API", version="1.0")
 
 app.add_middleware(
@@ -48,12 +47,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ---------------------------------------------------------------------------
-# REQUEST / RESPONSE MODELS
-# ---------------------------------------------------------------------------
+# ============================================
+# API Request Models (FastAPI specific)
+# ============================================
 
 
 class AnalyzeRequest(BaseModel):
+    """HTTP request model for /analyze endpoint"""
+
     url: str
     title: str
     artist_name: str
@@ -62,28 +63,9 @@ class AnalyzeRequest(BaseModel):
     release_date: Optional[str] = None
 
 
-class SimilarTrackResponse(BaseModel):
-    id: int
-    title: str
-    artist_name: str
-    url: str
-    source_platform: str
-    distance: float
-
-
-class SongResponse(BaseModel):
-    id: int
-    title: str
-    artist_name: str
-    url: str
-    source_platform: str
-    added_by: Optional[int]
-    release_date: Optional[str]
-
-
-# ---------------------------------------------------------------------------
-# ROUTES
-# ---------------------------------------------------------------------------
+# ============================================
+# Routes - Thin layer, delegates to service
+# ============================================
 
 
 @app.get("/")
@@ -91,74 +73,94 @@ def read_root():
     return {"message": "🎵 JetSwitch Music Analysis Service is running!"}
 
 
-@app.post("/analyze", response_model=SongResponse)
+@app.post("/analyze", response_model=SongResult)
 def analyze_song(request: AnalyzeRequest):
     """
-    Analyze a song (via YouTube or other URL) and store it in the repository.
+    Analyze and store a song.
+    Delegates to service.analyze_and_store()
     """
     try:
-        print(f"🎶 Analyzing new song: {request.title} - {request.artist_name}")
-        features = music_service.process_youtube_url(
-            url=request.url,
-            track_id=request.url,  # temporary ID to process features
-            metadata={
-                "title": request.title,
-                "artist": request.artist_name,
-                "youtube_url": request.url,
-            },
-        )
+        print(f"🎶 Analyzing: {request.title} by {request.artist_name}")
 
-        repository.store_features(
+        # Convert FastAPI model to service model
+        song_data = SongData(
+            url=request.url,
             title=request.title,
             artist_name=request.artist_name,
-            url=request.url,
-            song_feature=features,
             source_platform=request.source_platform,
             added_by=request.added_by,
             release_date=request.release_date,
         )
 
-        # Retrieve last stored song
-        songs = repository.list_all_songs()
-        last_song = songs[-1] if songs else None
-        if not last_song:
-            raise HTTPException(
-                status_code=500, detail="Failed to retrieve stored song."
-            )
+        # Delegate to service - service handles everything
+        result = music_service.analyze_and_store(song_data)
 
-        return last_song
+        print(f"✅ Stored song with ID: {result.id}")
+        return result
 
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        print(f"❌ Error in analyze_song: {e}")
+        print(f"❌ Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/similar", response_model=List[SimilarTrackResponse])
-def get_similar(
-    id: int = Query(..., description="Song ID to compare against"), limit: int = 10
+@app.get("/similar", response_model=List[SimilarSongResult])
+def get_similar_by_id(
+    id: int = Query(..., description="Song ID to find similar songs for"),
+    limit: int = Query(10, ge=1, le=100, description="Number of results"),
+    exclude_self: bool = Query(True, description="Exclude the query song"),
 ):
     """
-    Find similar songs to a given song ID.
+    Find similar songs by ID.
+    Delegates to service.find_similar_by_id()
     """
     try:
-        features = repository.get_features(id)
-        if features is None:
-            raise HTTPException(status_code=404, detail=f"Song ID {id} not found.")
+        print(f"🔍 Finding similar songs for ID: {id}")
 
-        similar = repository.find_similar(features, limit)
+        # Delegate to service - service handles everything
+        similar = music_service.find_similar_by_id(
+            song_id=id,
+            limit=limit,
+            exclude_self=exclude_self,
+        )
+
+        print(f"✅ Found {len(similar)} similar songs")
         return similar
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        print(f"❌ Error in get_similar: {e}")
+        print(f"❌ Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/songs", response_model=List[SongResponse])
+@app.get("/songs", response_model=List[SongResult])
 def list_songs():
     """
-    List all stored songs (metadata only).
+    List all songs.
+    Delegates to service.list_all_songs()
     """
     try:
-        return repository.list_all_songs()
+        return music_service.list_all_songs()
     except Exception as e:
-        print(f"❌ Error in list_songs: {e}")
+        print(f"❌ Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/songs/{song_id}", response_model=SongResult)
+def get_song(song_id: int):
+    """
+    Get a specific song by ID.
+    Delegates to service.get_song_by_id()
+    """
+    try:
+        song = music_service.get_song_by_id(song_id)
+        if not song:
+            raise HTTPException(status_code=404, detail=f"Song {song_id} not found")
+        return song
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
