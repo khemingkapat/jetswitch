@@ -60,7 +60,7 @@ class MockVectorRepository(VectorRepository):
         }
         print(f"✅ Stored mock song: {title} by {artist_name}")
 
-    def find_similar(self, features: np.ndarray, limit: int = 10) -> List[Dict]:
+    def find_similars(self, features: np.ndarray, limit: int = 10) -> List[Dict]:
         """Mock similarity search using cosine similarity."""
         if not self.storage:
             return []

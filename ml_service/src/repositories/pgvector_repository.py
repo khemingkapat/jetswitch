@@ -70,24 +70,39 @@ class PGVectorRepository(VectorRepository):
                 ),
             )
             conn.commit()
+
         print(f"✅ Stored or updated song: {title} by {artist_name}")
 
-    def find_similar(self, features: np.ndarray, limit: int = 10) -> List[Dict]:
+    def find_similars(
+        self,
+        features: np.ndarray,
+        limit: int = 10,
+        metric: str = "cosine",
+    ) -> Optional[List[Dict]]:
         """Find similar songs by vector distance."""
         if features.shape[0] != self.dim:
             raise ValueError(f"Query vector must have dimension {self.dim}")
 
+        operators = {"cosine": "<=>", "l2": "<->", "inner_product": "<#>"}
+        operator = operators.get(metric, "<=>")
+
+        params = [features.tolist(), limit]
+
         with self._connect() as conn, conn.cursor() as cur:
             cur.execute(
                 f"""
-                SELECT id, title, artist_name, url, source_platform, (song_feature <-> %s::vector) AS distance
+                SELECT id, title, artist_name, url, source_platform,
+                       (song_feature {operator} %s::vector) AS distance
                 FROM songs
                 ORDER BY distance ASC
                 LIMIT %s;
                 """,
-                (features.tolist(), limit),
+                params,
             )
             rows = cur.fetchall()
+
+        if not rows:
+            return None
 
         return [
             {

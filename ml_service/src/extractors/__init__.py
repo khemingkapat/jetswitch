@@ -1,0 +1,1 @@
+from .youtube_extractor import MusicAnalysisService

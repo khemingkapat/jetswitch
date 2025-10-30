@@ -24,7 +24,12 @@ class VectorRepository(ABC):
         pass
 
     @abstractmethod
-    def find_similar(self, features: np.ndarray, limit: int = 10) -> List[Dict]:
+    def find_similars(
+        self,
+        features: np.ndarray,
+        limit: int = 10,
+        metric: str = "cosine",
+    ) -> Optional[List[Dict]]:
         """Find similar tracks using vector similarity."""
         pass
 
