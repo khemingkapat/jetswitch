@@ -26,7 +26,7 @@ CREATE TABLE SONGS (
     title varchar(255) NOT NULL,
     artist_name varchar(255) NOT NULL,
     release_date date NULL,
-    url text NOT NULL,
+    url text UNIQUE NOT NULL,
     song_feature VECTOR NOT NULL, -- Requires a vector extension like pgvector
     source_platform varchar(50) CHECK (source_platform IN ('spotify', 'apple_music', 'youtube', 'other')),
     added_by integer REFERENCES USERS (id) ON DELETE SET NULL,
