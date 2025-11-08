@@ -48,7 +48,7 @@ app.add_middleware(
 )
 
 # ============================================
-# API Request Models (FastAPI specific)
+# API Request/Response Models
 # ============================================
 
 
@@ -63,6 +63,14 @@ class AnalyzeRequest(BaseModel):
     release_date: Optional[str] = None
 
 
+class AnalyzeResponse(BaseModel):
+    """HTTP response model for /analyze endpoint"""
+
+    song: SongResult
+    is_new: bool
+    message: str
+
+
 # ============================================
 # Routes - Thin layer, delegates to service
 # ============================================
@@ -73,11 +81,11 @@ def read_root():
     return {"message": "🎵 JetSwitch Music Analysis Service is running!"}
 
 
-@app.post("/analyze", response_model=SongResult)
+@app.post("/analyze", response_model=AnalyzeResponse)
 def analyze_song(request: AnalyzeRequest):
     """
     Analyze and store a song.
-    Delegates to service.analyze_and_store()
+    Returns the song data and whether it was newly inserted or already existed.
     """
     try:
         print(f"🎶 Analyzing: {request.title} by {request.artist_name}")
@@ -93,10 +101,20 @@ def analyze_song(request: AnalyzeRequest):
         )
 
         # Delegate to service - service handles everything
-        result = music_service.analyze_and_store(song_data)
+        result, is_new = music_service.analyze_and_store(song_data)
 
-        print(f"✅ Stored song with ID: {result.id}")
-        return result
+        if is_new:
+            message = f"✅ Successfully analyzed and stored '{result.title}' by {result.artist_name}"
+            print(f"✅ Stored new song with ID: {result.id}")
+        else:
+            message = f"⚠️  Song already exists: '{result.title}' by {result.artist_name} (ID: {result.id})"
+            print(message)
+
+        return AnalyzeResponse(
+            song=result,
+            is_new=is_new,
+            message=message,
+        )
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

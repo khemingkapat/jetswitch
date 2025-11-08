@@ -1,6 +1,6 @@
 import numpy as np
 import psycopg2
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from .vector_repository import VectorRepository
 
 
@@ -32,53 +32,91 @@ class PGVectorRepository(VectorRepository):
         source_platform: str,
         added_by: Optional[int] = None,
         release_date: Optional[str] = None,
-    ) -> None:
+    ) -> Tuple[Dict, bool]:
         """
-        Insert or update a song record in the songs table.
+        Insert a song record in the songs table with transaction handling.
 
-        - title, artist_name, url: basic song info
-        - song_feature: np.ndarray representing feature vector
-        - source_platform: 'spotify', 'apple_music', etc.
-        - added_by: user_id who added the song (optional)
-        - release_date: string like '2024-05-10' (optional)
+        Returns:
+            Tuple[Dict, bool]: (song_data, is_new)
+                - song_data: Dictionary containing the song information
+                - is_new: True if newly inserted, False if URL already existed
         """
         if song_feature.shape[0] != self.dim:
             raise ValueError(f"Feature vector must have dimension {self.dim}")
 
-        with self._connect() as conn, conn.cursor() as cur:
-            cur.execute(
-                """
-                INSERT INTO songs (title, artist_name, release_date, url, song_feature, source_platform, added_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (url)
-                DO UPDATE SET
-                    title = EXCLUDED.title,
-                    artist_name = EXCLUDED.artist_name,
-                    release_date = EXCLUDED.release_date,
-                    song_feature = EXCLUDED.song_feature,
-                    source_platform = EXCLUDED.source_platform,
-                    added_by = EXCLUDED.added_by;
-                """,
-                (
-                    title,
-                    artist_name,
-                    release_date,
-                    url,
-                    song_feature.tolist(),
-                    source_platform,
-                    added_by,
-                ),
-            )
-            conn.commit()
+        conn = self._connect()
+        try:
+            with conn.cursor() as cur:
 
-        print(f"✅ Stored or updated song: {title} by {artist_name}")
+                cur.execute(
+                    "SELECT id, title, artist_name, release_date, url, source_platform, added_by, added_at FROM songs WHERE url = %s",
+                    (url,),
+                )
+                existing = cur.fetchone()
+
+                if existing:
+                    conn.rollback()
+                    print(
+                        f"⚠️  Song already exists: {existing[1]} by {existing[2]} (ID: {existing[0]})"
+                    )
+                    return {
+                        "id": existing[0],
+                        "title": existing[1],
+                        "artist_name": existing[2],
+                        "release_date": existing[3],
+                        "url": existing[4],
+                        "source_platform": existing[5],
+                        "added_by": existing[6],
+                        "added_at": existing[7],
+                    }, False
+
+                cur.execute(
+                    """
+                    INSERT INTO songs (title, artist_name, release_date, url, song_feature, source_platform, added_by)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id, title, artist_name, release_date, url, source_platform, added_by, added_at;
+                    """,
+                    (
+                        title,
+                        artist_name,
+                        release_date,
+                        url,
+                        song_feature.tolist(),
+                        source_platform,
+                        added_by,
+                    ),
+                )
+
+                new_song = cur.fetchone()
+                conn.commit()
+
+                print(
+                    f"✅ Stored new song: {new_song[1]} by {new_song[2]} (ID: {new_song[0]})"
+                )
+
+                return {
+                    "id": new_song[0],
+                    "title": new_song[1],
+                    "artist_name": new_song[2],
+                    "release_date": new_song[3],
+                    "url": new_song[4],
+                    "source_platform": new_song[5],
+                    "added_by": new_song[6],
+                    "added_at": new_song[7],
+                }, True
+
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            conn.close()
 
     def find_similars(
         self,
         features: np.ndarray,
         limit: int = 10,
         metric: str = "cosine",
-        exclude_id=Optional[int],
+        exclude_id: Optional[int] = None,
     ) -> Optional[List[Dict]]:
         """Find similar songs by vector distance."""
         if features.shape[0] != self.dim:
@@ -88,19 +126,21 @@ class PGVectorRepository(VectorRepository):
         operator = operators.get(metric, "<=>")
 
         where_clause = "WHERE id != %s" if exclude_id else ""
+        params = [features.tolist()]
+        if exclude_id:
+            params.append(exclude_id)
+        params.append(limit)
 
         with self._connect() as conn, conn.cursor() as cur:
-            cur.execute(
-                f"""
+            query = f"""
                 SELECT id, title, artist_name, url, source_platform,
                        (song_feature {operator} %s::vector) AS distance
                 FROM songs
-				{where_clause}
+                {where_clause}
                 ORDER BY distance ASC
                 LIMIT %s;
-                """,
-                (features.tolist(), exclude_id, limit),
-            )
+            """
+            cur.execute(query, params)
             rows = cur.fetchall()
 
         if not rows:

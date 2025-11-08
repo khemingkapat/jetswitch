@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 
 
 class VectorRepository(ABC):
@@ -19,8 +19,15 @@ class VectorRepository(ABC):
         source_platform: str,
         added_by: Optional[int] = None,
         release_date: Optional[str] = None,
-    ) -> None:
-        """Store audio features with metadata."""
+    ) -> Tuple[Dict, bool]:
+        """
+        Store audio features with metadata.
+
+        Returns:
+            Tuple[Dict, bool]: (song_data, is_new)
+                - song_data: Dictionary containing the song information
+                - is_new: True if newly inserted, False if URL already existed
+        """
         pass
 
     @abstractmethod

@@ -3,7 +3,7 @@ import yt_dlp
 import librosa
 import tempfile
 import numpy as np
-from typing import Optional
+from typing import Optional, Tuple
 from src.repositories.vector_repository import VectorRepository
 from src.models import SongData, SongResult, SimilarSongResult
 
@@ -17,10 +17,14 @@ class MusicAnalysisService:
     def __init__(self, repository: VectorRepository):
         self.repository = repository  # Private – used only within this service
 
-    def analyze_and_store(self, song_data: SongData) -> SongResult:
+    def analyze_and_store(self, song_data: SongData) -> Tuple[SongResult, bool]:
         """
         Analyze a song from a URL and store it.
-        Returns: The stored song as a SongResult object.
+
+        Returns:
+            Tuple[SongResult, bool]: (song_result, is_new)
+                - song_result: The stored song as a SongResult object
+                - is_new: True if newly inserted, False if URL already existed
         """
         audio_path = None
         try:
@@ -29,8 +33,8 @@ class MusicAnalysisService:
             features = self._extract_features(audio_path)
             print("✅ Analyzed song features")
 
-            # Step 2: Store in repository
-            self.repository.store_features(
+            # Step 2: Store in repository (with duplicate check)
+            song_dict, is_new = self.repository.store_features(
                 title=song_data.title,
                 artist_name=song_data.artist_name,
                 url=song_data.url,
@@ -39,16 +43,13 @@ class MusicAnalysisService:
                 added_by=song_data.added_by,
                 release_date=song_data.release_date,
             )
-            print("💾 Stored in repository")
 
-            # Step 3: Retrieve stored song
-            songs = self.repository.list_all_songs()
-            last_song = songs[-1] if songs else None
+            if is_new:
+                print("💾 Stored new song in repository")
+            else:
+                print("🔄 Song already exists in repository")
 
-            if not last_song:
-                raise ValueError("Failed to retrieve stored song")
-
-            return SongResult(**last_song)
+            return SongResult(**song_dict), is_new
 
         finally:
             if audio_path and os.path.exists(audio_path):

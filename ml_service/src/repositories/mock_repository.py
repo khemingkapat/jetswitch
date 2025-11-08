@@ -1,6 +1,6 @@
 import numpy as np
 from .vector_repository import VectorRepository
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 
 class MockVectorRepository(VectorRepository):
@@ -26,25 +26,33 @@ class MockVectorRepository(VectorRepository):
         source_platform: str,
         added_by: Optional[int] = None,
         release_date: Optional[str] = None,
-    ) -> None:
-        """Store or update song record in memory."""
+    ) -> Tuple[Dict, bool]:
+        """
+        Store or check for existing song record in memory.
+
+        Returns:
+            Tuple[Dict, bool]: (song_data, is_new)
+                - song_data: Dictionary containing the song information
+                - is_new: True if newly inserted, False if URL already existed
+        """
         # Check if song already exists (by URL)
         for song_id, song in self.storage.items():
             if song["url"] == url:
-                song.update(
-                    {
-                        "title": title,
-                        "artist_name": artist_name,
-                        "release_date": release_date,
-                        "song_feature": song_feature,
-                        "source_platform": source_platform,
-                        "added_by": added_by,
-                    }
+                print(
+                    f"⚠️  Mock song already exists: {song['title']} by {song['artist_name']} (ID: {song_id})"
                 )
-                print(f"🌀 Updated mock song: {title} by {artist_name}")
-                return
+                return {
+                    "id": song["id"],
+                    "title": song["title"],
+                    "artist_name": song["artist_name"],
+                    "release_date": song["release_date"],
+                    "url": song["url"],
+                    "source_platform": song["source_platform"],
+                    "added_by": song["added_by"],
+                    "added_at": None,  # Mock doesn't track timestamps
+                }, False
 
-        # Otherwise, insert new record
+        # URL is unique, insert new record
         song_id = self._next_id
         self._next_id += 1
 
@@ -58,18 +66,40 @@ class MockVectorRepository(VectorRepository):
             "source_platform": source_platform,
             "added_by": added_by,
         }
-        print(f"✅ Stored mock song: {title} by {artist_name}")
 
-    def find_similars(self, features: np.ndarray, limit: int = 10) -> List[Dict]:
+        print(f"✅ Stored new mock song: {title} by {artist_name} (ID: {song_id})")
+
+        return {
+            "id": song_id,
+            "title": title,
+            "artist_name": artist_name,
+            "release_date": release_date,
+            "url": url,
+            "source_platform": source_platform,
+            "added_by": added_by,
+            "added_at": None,
+        }, True
+
+    def find_similars(
+        self,
+        features: np.ndarray,
+        limit: int = 10,
+        metric: str = "cosine",
+        exclude_id: Optional[int] = None,
+    ) -> Optional[List[Dict]]:
         """Mock similarity search using cosine similarity."""
         if not self.storage:
-            return []
+            return None
 
         similarities = []
         for song in self.storage.values():
-            stored_features = song["song_feature"]
+            # Skip if this is the song to exclude
+            if exclude_id and song["id"] == exclude_id:
+                continue
 
+            stored_features = song["song_feature"]
             similarity = self._cosine_similarity(features, stored_features)
+
             similarities.append(
                 {
                     "id": song["id"],
@@ -77,12 +107,13 @@ class MockVectorRepository(VectorRepository):
                     "artist_name": song["artist_name"],
                     "url": song["url"],
                     "source_platform": song["source_platform"],
-                    "similarity": float(similarity),
+                    "distance": 1.0
+                    - float(similarity),  # Convert similarity to distance
                 }
             )
 
-        # Sort by similarity (descending)
-        similarities.sort(key=lambda x: x["similarity"], reverse=True)
+        # Sort by distance (ascending - smaller is more similar)
+        similarities.sort(key=lambda x: x["distance"])
         return similarities[:limit]
 
     def get_features(self, song_id: int) -> Optional[np.ndarray]:
@@ -102,7 +133,7 @@ class MockVectorRepository(VectorRepository):
                 "url": song["url"],
                 "source_platform": song["source_platform"],
                 "added_by": song["added_by"],
-                "release_date": song["release_date"],
+                "added_at": None,  # Mock doesn't track timestamps
             }
             for song in self.storage.values()
         ]
