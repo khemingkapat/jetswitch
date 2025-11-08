@@ -32,13 +32,13 @@ func AnalyzeAndStoreSong(req models.AnalyzeMusicRequest) (*models.SongResult, er
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("ML service error (status %d): %s", resp.StatusCode, string(body))
 	}
-
-	var songResult models.SongResult
-	if err := json.NewDecoder(resp.Body).Decode(&songResult); err != nil {
+	var mlResponse models.MLAnalyzeResponse
+	if err := json.NewDecoder(resp.Body).Decode(&mlResponse); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
-	return &songResult, nil
+	// 2. Return the *nested* song object from the response
+	return &mlResponse.Song, nil
 }
 
 // FindSimilarSongs retrieves similar songs from the ML service by song ID
