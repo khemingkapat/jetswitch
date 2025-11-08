@@ -21,6 +21,13 @@ type SongResult struct {
 	AddedAt        *string `json:"added_at"`
 }
 
+// MLAnalyzeResponse represents the response from ML service /analyze endpoint
+type MLAnalyzeResponse struct {
+	Song    SongResult `json:"song"`
+	IsNew   bool       `json:"is_new"`
+	Message string     `json:"message"`
+}
+
 // SimilarSong represents a similar song result with distance score
 type SimilarSong struct {
 	ID             int     `json:"id"`
