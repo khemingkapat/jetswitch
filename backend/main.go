@@ -48,6 +48,11 @@ func main() {
 	app.Post("/api/auth/update-user-type", handlers.UpdateUserTypeHandler)
 	app.Get("/api/auth/me", middleware.AuthRequired, handlers.GetMe)
 
+	app.Post("/api/music/analyze", handlers.AnalyzeMusic)
+	app.Get("/api/music/similar", handlers.GetSimilarSongs)
+	app.Get("/api/music/songs", handlers.ListAllSongs)
+	app.Get("/api/music/songs/:id", handlers.GetSongByID)
+
 	// ML endpoint
 	app.Get("/ml", func(c *fiber.Ctx) error {
 		resp, err := http.Get("http://ml_service:8000")
