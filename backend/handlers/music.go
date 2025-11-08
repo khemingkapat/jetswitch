@@ -34,7 +34,6 @@ func AnalyzeMusic(c *fiber.Ctx) error {
 			"details": err.Error(),
 		})
 	}
-	fmt.Println("Analyzed")
 
 	// Step 2: Find similar songs
 	similarSongs, err := services.FindSimilarSongs(songResult.ID, 10, true)
@@ -47,7 +46,6 @@ func AnalyzeMusic(c *fiber.Ctx) error {
 			Message:      "Song analyzed and stored successfully, but similarity search failed",
 		})
 	}
-	fmt.Println("Similars Found")
 
 	// Return complete response
 	return c.JSON(models.AnalyzeMusicResponse{
