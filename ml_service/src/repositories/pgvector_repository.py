@@ -23,6 +23,28 @@ class PGVectorRepository(VectorRepository):
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             conn.commit()
 
+    def get_song_by_url(self, url: str) -> Optional[Dict]:
+        """Get a song's metadata by its unique URL."""
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, title, artist_name, release_date, url, source_platform, added_by, added_at FROM songs WHERE url = %s",
+                (url,),
+            )
+            existing = cur.fetchone()
+
+            if existing:
+                return {
+                    "id": existing[0],
+                    "title": existing[1],
+                    "artist_name": existing[2],
+                    "release_date": existing[3],
+                    "url": existing[4],
+                    "source_platform": existing[5],
+                    "added_by": existing[6],
+                    "added_at": existing[7],
+                }
+        return None
+
     def store_features(
         self,
         title: str,
@@ -47,7 +69,8 @@ class PGVectorRepository(VectorRepository):
         conn = self._connect()
         try:
             with conn.cursor() as cur:
-
+                # This check remains as a final safety (in case of race condition)
+                # But the service layer will now catch most duplicates.
                 cur.execute(
                     "SELECT id, title, artist_name, release_date, url, source_platform, added_by, added_at FROM songs WHERE url = %s",
                     (url,),

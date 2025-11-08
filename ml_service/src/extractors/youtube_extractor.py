@@ -26,14 +26,27 @@ class MusicAnalysisService:
                 - song_result: The stored song as a SongResult object
                 - is_new: True if newly inserted, False if URL already existed
         """
+
+        # --- START: OPTIMIZATION ---
+        # Step 1: Check if song already exists by URL *before* downloading
+        existing_song = self.repository.get_song_by_url(song_data.url)
+        if existing_song:
+            print(
+                f"🔄 Song already exists (URL check): {existing_song['title']} (ID: {existing_song['id']})"
+            )
+            return SongResult(**existing_song), False
+        # --- END: OPTIMIZATION ---
+
         audio_path = None
         try:
-            # Step 1: Download and extract features
+            # Step 2: Download and extract features (only if it's a new song)
+            print(f"⬇️ Downloading audio for: {song_data.title}")
             audio_path = self._download_audio(song_data.url)
+            print("🔬 Extracting features...")
             features = self._extract_features(audio_path)
             print("✅ Analyzed song features")
 
-            # Step 2: Store in repository (with duplicate check)
+            # Step 3: Store in repository
             song_dict, is_new = self.repository.store_features(
                 title=song_data.title,
                 artist_name=song_data.artist_name,
@@ -47,7 +60,8 @@ class MusicAnalysisService:
             if is_new:
                 print("💾 Stored new song in repository")
             else:
-                print("🔄 Song already exists in repository")
+                # This should rarely happen now, but good as a safety check
+                print("🔄 Song already exists in repository (race condition)")
 
             return SongResult(**song_dict), is_new
 
@@ -79,10 +93,10 @@ class MusicAnalysisService:
         )
 
         # Step 3: Optionally filter out the song itself
-        if exclude_self:
+        if similar and exclude_self:
             similar = [s for s in similar if s["id"] != song_id]
 
-        return [SimilarSongResult(**song) for song in similar]
+        return [SimilarSongResult(**song) for song in similar] if similar else []
 
     def list_all_songs(self) -> list[SongResult]:
         """

@@ -10,6 +10,11 @@ class VectorRepository(ABC):
     """
 
     @abstractmethod
+    def get_song_by_url(self, url: str) -> Optional[Dict]:
+        """Get a song's metadata by its unique URL."""
+        pass
+
+    @abstractmethod
     def store_features(
         self,
         title: str,

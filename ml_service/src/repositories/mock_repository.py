@@ -17,6 +17,22 @@ class MockVectorRepository(VectorRepository):
         self._next_id = 1
         print("🔧 Using MOCK vector repository (in-memory)")
 
+    def get_song_by_url(self, url: str) -> Optional[Dict]:
+        """Get a song's metadata by its unique URL."""
+        for song in self.storage.values():
+            if song["url"] == url:
+                return {
+                    "id": song["id"],
+                    "title": song["title"],
+                    "artist_name": song["artist_name"],
+                    "release_date": song["release_date"],
+                    "url": song["url"],
+                    "source_platform": song["source_platform"],
+                    "added_by": song["added_by"],
+                    "added_at": None,  # Mock doesn't track timestamps
+                }
+        return None
+
     def store_features(
         self,
         title: str,
@@ -36,21 +52,13 @@ class MockVectorRepository(VectorRepository):
                 - is_new: True if newly inserted, False if URL already existed
         """
         # Check if song already exists (by URL)
-        for song_id, song in self.storage.items():
-            if song["url"] == url:
-                print(
-                    f"⚠️  Mock song already exists: {song['title']} by {song['artist_name']} (ID: {song_id})"
-                )
-                return {
-                    "id": song["id"],
-                    "title": song["title"],
-                    "artist_name": song["artist_name"],
-                    "release_date": song["release_date"],
-                    "url": song["url"],
-                    "source_platform": song["source_platform"],
-                    "added_by": song["added_by"],
-                    "added_at": None,  # Mock doesn't track timestamps
-                }, False
+        # This check remains as a final safety, but get_song_by_url will catch most
+        existing_song = self.get_song_by_url(url)
+        if existing_song:
+            print(
+                f"⚠️  Mock song already exists: {existing_song['title']} by {existing_song['artist_name']} (ID: {existing_song['id']})"
+            )
+            return existing_song, False
 
         # URL is unique, insert new record
         song_id = self._next_id
