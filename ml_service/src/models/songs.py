@@ -34,4 +34,4 @@ class SimilarSongResult(BaseModel):
     artist_name: str
     url: str
     source_platform: str
-    distance: float
+    score: float

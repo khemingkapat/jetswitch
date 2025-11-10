@@ -85,18 +85,36 @@ class MusicAnalysisService:
             raise ValueError(f"Song with ID {song_id} not found")
 
         # Step 2: Find similar songs
-        similar = self.repository.find_similars(
+        similar_raw = self.repository.find_similars(
             features=features,
             limit=limit + 1 if exclude_self else limit,
             metric="cosine",
-            exclude_id=song_id if exclude_self else None,
+            # We no longer exclude here, we do it after conversion
+            exclude_id=None,
         )
 
-        # Step 3: Optionally filter out the song itself
-        if similar and exclude_self:
-            similar = [s for s in similar if s["id"] != song_id]
+        if not similar_raw:
+            return []
 
-        return [SimilarSongResult(**song) for song in similar] if similar else []
+        # --- START: NEW LOGIC ---
+        # Step 3: Convert distance to score
+        results = []
+        for song in similar_raw:
+            distance = song["distance"]
+            similarity = 1 - distance
+            score = max(0, similarity) * 10  # Scale [0, 1] similarity to [0, 10] score
+
+            results.append(
+                SimilarSongResult(
+                    id=song["id"],
+                    title=song["title"],
+                    artist_name=song["artist_name"],
+                    url=song["url"],
+                    source_platform=song["source_platform"],
+                    score=score,  # Use 'score'
+                )
+            )
+        return results
 
     def list_all_songs(self) -> list[SongResult]:
         """

@@ -35,7 +35,7 @@ type SimilarSong struct {
 	ArtistName     string  `json:"artist_name"`
 	URL            string  `json:"url"`
 	SourcePlatform string  `json:"source_platform"`
-	Distance       float64 `json:"distance"`
+	Score          float64 `json:"score"`
 }
 
 // AnalyzeMusicResponse represents the complete response

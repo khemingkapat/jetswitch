@@ -26,7 +26,7 @@ interface Song {
 	id: number;
 	title: string;
 	artist_name: string;
-	distance: number;
+	score: number;
 }
 
 interface SongItemProps {
@@ -47,7 +47,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 				<div className="flex items-center gap-3 ml-4">
 					<div className="flex items-center gap-1 bg-amber-500 px-3 py-1 rounded-full">
 						<span className="text-white font-bold">★</span>
-						<span className="text-white font-semibold">{song.distance.toFixed(5)}</span>
+						<span className="text-white font-semibold">{song.score.toFixed(5)}</span>
 					</div>
 					<button
 						onClick={() => onThumbsUp?.(song.id)}
