@@ -101,7 +101,7 @@ class MusicAnalysisService:
         results = []
         for song in similar_raw:
             distance = song["distance"]
-            similarity = 1 - distance
+            similarity = 1 - distance * 100
             score = max(0, similarity) * 10  # Scale [0, 1] similarity to [0, 10] score
 
             results.append(
