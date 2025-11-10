@@ -7,6 +7,7 @@ import SelectUserType from './pages/SelectUserType';
 import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import './App.css';
+import MusicUploadPage from './pages/MusicUpload';
 
 type WithChildren = { children: JSX.Element };
 
@@ -41,6 +42,14 @@ export default function App(): JSX.Element {
 						element={
 							<ProtectedRoute>
 								<HomePage />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/upload"
+						element={
+							<ProtectedRoute>
+								<MusicUploadPage />
 							</ProtectedRoute>
 						}
 					/>
