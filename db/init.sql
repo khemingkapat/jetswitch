@@ -26,7 +26,7 @@ CREATE TABLE SONGS (
     title varchar(255) NOT NULL,
     artist_name varchar(255) NOT NULL,
     release_date date NULL,
-    url text NOT NULL,
+    url text UNIQUE NOT NULL,
     song_feature VECTOR NOT NULL, -- Requires a vector extension like pgvector
     source_platform varchar(50) CHECK (source_platform IN ('spotify', 'apple_music', 'youtube', 'other')),
     added_by integer REFERENCES USERS (id) ON DELETE SET NULL,
@@ -93,3 +93,16 @@ CREATE TABLE PLAYLIST_SONGS (
     PRIMARY KEY (playlist_id, song_id)
     -- UNIQUE (playlist_id, "position") -- Consider adding this constraint
 );
+
+CREATE TABLE IF NOT EXISTS SONG_FEEDBACK (
+    id serial PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES USERS (id) ON DELETE CASCADE,
+    query_song_id integer NOT NULL REFERENCES SONGS (id) ON DELETE CASCADE,
+    suggested_song_id integer NOT NULL REFERENCES SONGS (id) ON DELETE CASCADE,
+    vote integer NOT NULL CHECK (vote IN (1, -1)),
+    voted_at timestamp with time zone DEFAULT NOW(),
+    UNIQUE (user_id, query_song_id, suggested_song_id)
+);
+
+-- Index for fast lookup of votes for a specific recommendation
+CREATE INDEX idx_feedback_query_song ON SONG_FEEDBACK (query_song_id, suggested_song_id);

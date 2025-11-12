@@ -1,0 +1,59 @@
+package models
+
+// AnalyzeMusicRequest represents the request body for music analysis
+type AnalyzeMusicRequest struct {
+	URL            string  `json:"url"`
+	Title          string  `json:"title"`
+	ArtistName     string  `json:"artist_name"`
+	SourcePlatform string  `json:"source_platform"`
+	AddedBy        *int    `json:"added_by,omitempty"`
+	ReleaseDate    *string `json:"release_date,omitempty"`
+}
+
+// SongResult represents a stored song with metadata
+type SongResult struct {
+	ID             int     `json:"id"`
+	Title          string  `json:"title"`
+	ArtistName     string  `json:"artist_name"`
+	URL            string  `json:"url"`
+	SourcePlatform string  `json:"source_platform"`
+	AddedBy        *int    `json:"added_by"`
+	AddedAt        *string `json:"added_at"`
+}
+
+// MLAnalyzeResponse represents the response from ML service /analyze endpoint
+type MLAnalyzeResponse struct {
+	Song    SongResult `json:"song"`
+	IsNew   bool       `json:"is_new"`
+	Message string     `json:"message"`
+}
+
+// SimilarSong represents a similar song result with distance score
+type SimilarSong struct {
+	ID             int     `json:"id"`
+	Title          string  `json:"title"`
+	ArtistName     string  `json:"artist_name"`
+	URL            string  `json:"url"`
+	SourcePlatform string  `json:"source_platform"`
+	Score          float64 `json:"score"`
+}
+
+// AnalyzeMusicResponse represents the complete response
+type AnalyzeMusicResponse struct {
+	Song         SongResult    `json:"song"`
+	SimilarSongs []SimilarSong `json:"similar_songs"`
+	Message      string        `json:"message"`
+}
+
+type FeedbackRequest struct {
+	QuerySongID     int `json:"query_song_id"`
+	SuggestedSongID int `json:"suggested_song_id"`
+	Vote            int `json:"vote"`
+}
+
+type MLFeedbackRequest struct {
+	UserID          int `json:"user_id"`
+	QuerySongID     int `json:"query_song_id"`
+	SuggestedSongID int `json:"suggested_song_id"`
+	Vote            int `json:"vote"`
+}

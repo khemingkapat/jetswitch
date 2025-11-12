@@ -50,7 +50,7 @@ export default function LandingPage() {
 				alignItems: 'center',
 				gap: '20px' // space between buttons
 			}}>
-				<Link to="/">
+				<Link to="/upload">
 					<button style={primaryButtonStyle}>
 						Get Started
 					</button>
