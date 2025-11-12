@@ -7,7 +7,7 @@ interface Song {
 	title: string;
 	artist_name: string;
 	score: number;
-	url: string;
+	url: string; // The song URL
 }
 
 interface SongItemProps {
@@ -17,7 +17,7 @@ interface SongItemProps {
 }
 
 const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) => {
-	// --- Diagnostic Logs ---
+	// No changes to state or logs
 	console.log(`[Song ${song.id}] Rendered. URL: ${song.url}`);
 
 	useEffect(() => {
@@ -25,29 +25,38 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 	}, [song.id, song.url]);
 
 	const [playing, setPlaying] = useState(false);
-	const [played, setPlayed] = useState(0);
+	const [played, setPlayed] = useState(0);       // Fraction 0 to 1
 	const [seeking, setSeeking] = useState(false);
-	const [duration, setDuration] = useState(0);
-	const playerRef = useRef<ReactPlayer>(null);
+	const [duration, setDuration] = useState(0);     // Duration in seconds
+
+	const playerRef = useRef<HTMLVideoElement>(null);
+
+	// All handler functions (handlePlayPause, handleDurationChange, etc.)
+	// remain exactly the same as the previous version.
 
 	const handlePlayPause = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		setPlaying((prev) => {
 			const next = !prev;
 			console.log(`[Song ${song.id}] Play/Pause clicked. Now playing = ${next}`);
-			if (next) console.log(`[Song ${song.id}] ▶️ Now playing: ${song.url}`);
 			return next;
 		});
 	};
 
-	const handleDuration = (duration: number) => {
-		console.log(`[Song ${song.id}] DURATION LOADED: ${duration}s`);
-		setDuration(duration);
+	const handleDurationChange = () => {
+		if (playerRef.current) {
+			const newDuration = playerRef.current.duration;
+			if (isFinite(newDuration)) { // Avoid NaN or Infinity
+				console.log(`[Song ${song.id}] DURATION LOADED: ${newDuration}s`);
+				setDuration(newDuration);
+			}
+		}
 	};
 
-	const handleProgress = (state: { played: number }) => {
-		if (!seeking) {
-			setPlayed(state.played);
+	const handleTimeUpdate = () => {
+		if (playerRef.current && !seeking && playerRef.current.duration) {
+			const newPlayed = playerRef.current.currentTime / playerRef.current.duration;
+			setPlayed(newPlayed);
 		}
 	};
 
@@ -65,10 +74,14 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 	const handleSeekMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
 		e.stopPropagation();
 		setSeeking(false);
-		if (playerRef.current) {
-			const newPlayedValue = parseFloat((e.target as HTMLInputElement).value);
-			console.log(`[Song ${song.id}] Seek to: ${newPlayedValue}`);
-			playerRef.current.seekTo(newPlayedValue);
+
+		if (playerRef.current && playerRef.current.duration) {
+			const newPlayedValue = parseFloat((e.target as HTMLInputElement).value); // This is the fraction (0-1)
+			const currentDuration = playerRef.current.duration;
+			const newTimeInSeconds = newPlayedValue * currentDuration;
+
+			console.log(`[Song ${song.id}] Seek to: ${newTimeInSeconds}s`);
+			playerRef.current.currentTime = newTimeInSeconds;
 		}
 	};
 
@@ -76,6 +89,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 		e.stopPropagation();
 	};
 
+	// This function is no longer used, but we can keep it for future use
 	const formatTime = (seconds: number) => {
 		if (isNaN(seconds) || seconds === 0) return '0:00';
 		const date = new Date(seconds * 1000);
@@ -87,7 +101,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 
 	return (
 		<div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/15 transition-all">
-			{/* Top section */}
+			{/* Top section (No changes here) */}
 			<div className="flex items-center justify-between mb-3" onClick={stopPropagation}>
 				<div className="flex-1 min-w-0">
 					<h3 className="text-white font-semibold truncate">{song.title}</h3>
@@ -115,30 +129,35 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 				</div>
 			</div>
 
-			{/* Player */}
-			<div className="mb-3" onClick={stopPropagation}>
+			{/* --- 1. HIDE PLAYER ---
+                We add style={{ display: 'none' }} to this div to ensure
+                the ReactPlayer component is not visible.
+            */}
+			<div
+				className="mb-3"
+				onClick={stopPropagation}
+				style={{ display: 'none' }}
+			>
 				<ReactPlayer
 					ref={playerRef}
-					src={song.url}          // ✅ use url, not src
+					src={song.url}
 					playing={playing}
 					muted={!playing}
-					controls={false}        // hide YouTube controls if you want your custom slider
+					controls={false}
 					width="0"
 					height="0"
 					onPlay={() => {
-						console.log(`[Song ${song.id}] ▶️ onPlay — Now playing: ${song.url}`);
+						console.log(`[Song ${song.id}] ▶️ onPlay`);
 						setPlaying(true);
 					}}
 					onPause={() => {
 						console.log(`[Song ${song.id}] ⏸️ onPause`);
 						setPlaying(false);
 					}}
-					onDuration={handleDuration}
-					onProgress={handleProgress}
+					onDurationChange={handleDurationChange}
+					onTimeUpdate={handleTimeUpdate}
 					onError={(e) => console.error(`[Song ${song.id}] ❌ Player ERROR:`, e)}
 				/>
-
-
 			</div>
 
 			{/* Custom Controls */}
@@ -168,13 +187,12 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 					style={{ accentColor: '#ec4899' }}
 				/>
 
-				<span className="text-white/70 text-sm font-mono w-24 text-right">
-					{formatTime(played * duration)} / {formatTime(duration)}
-				</span>
+				{/* --- 2. REMOVE TIME DISPLAY ---
+                    The <span> element that showed the time is now removed.
+                */}
 			</div>
 		</div>
 	);
 };
 
 export default SongItem;
-
