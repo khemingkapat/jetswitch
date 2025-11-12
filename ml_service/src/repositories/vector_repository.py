@@ -55,3 +55,17 @@ class VectorRepository(ABC):
     def list_all_songs(self) -> List[Dict]:
         """Lists all stored track_id and metadata."""
         pass
+
+    @abstractmethod
+    def store_feedback(
+        self, user_id: int, query_song_id: int, suggested_song_id: int, vote: int
+    ) -> None:
+        """Store a user's vote for a song match."""
+        pass
+
+    @abstractmethod
+    def get_feedback_scores(
+        self, query_song_id: int, suggested_song_ids: List[int]
+    ) -> Dict[int, int]:
+        """Get the aggregate vote score for a list of suggested songs."""
+        pass

@@ -3,7 +3,7 @@ import yt_dlp
 import librosa
 import tempfile
 import numpy as np
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 from src.repositories.vector_repository import VectorRepository
 from src.models import SongData, SongResult, SimilarSongResult
 
@@ -76,45 +76,103 @@ class MusicAnalysisService:
         exclude_self: bool = True,
     ) -> list[SimilarSongResult]:
         """
-        Find similar songs by song ID.
-        Returns: A list of similar songs with distance scores.
+        Find similar songs by song ID, now with 70/30 feedback adjustment.
+        Returns: A list of similar songs with adjusted scores (0-10 scale).
         """
+
+        # --- START: NEW SCORE CONFIGURATION ---
+        AUDIO_WEIGHT_MAX = 7.0  # 70% of the max 10 points
+        VOTE_WEIGHT_MAX = 3.0  # 30% of the max 10 points
+
+        # This new value controls how "fast" the vote score climbs.
+        # A smaller value (e.g., 0.1) requires more votes to reach the max.
+        # A larger value (e.g., 0.5) lets just 2-3 votes dominate.
+        VOTE_SENSITIVITY = 0.2
+        # --- END: NEW SCORE CONFIGURATION ---
+
         # Step 1: Retrieve features
         features = self.repository.get_features(song_id)
         if features is None:
             raise ValueError(f"Song with ID {song_id} not found")
 
-        # Step 2: Find similar songs
+        # Step 2: Find similar songs (get a few extra to allow for re-ranking)
+        search_limit = limit + 5  # Get a few extra candidates
         similar_raw = self.repository.find_similars(
             features=features,
-            limit=limit + 1 if exclude_self else limit,
+            limit=search_limit,
             metric="cosine",
-            # We no longer exclude here, we do it after conversion
             exclude_id=None,
         )
 
         if not similar_raw:
             return []
 
-        # --- START: NEW LOGIC ---
-        # Step 3: Convert distance to score
+        # Step 3: Get feedback scores for these candidates
+        candidate_ids = [song["id"] for song in similar_raw]
+        feedback_scores = self.repository.get_feedback_scores(
+            query_song_id=song_id, suggested_song_ids=candidate_ids
+        )
+
+        # Step 4: Calculate new combined score
         results = []
+
         for song in similar_raw:
+            # Exclude self if needed
+            if exclude_self and song["id"] == song_id:
+                continue
+
             distance = song["distance"]
-            similarity = 1 - distance * 100
-            score = max(0, similarity) * 10  # Scale [0, 1] similarity to [0, 10] score
+            audio_similarity = 1 - distance * 100  # Cosine similarity (0.0 to 1.0)
+
+            # 1. Calculate Audio Score (0 to 7)
+            audio_score = audio_similarity * AUDIO_WEIGHT_MAX
+
+            # Get vote score, default to 0 if no votes
+            total_votes = feedback_scores.get(song["id"], 0)
+
+            # 2. Calculate Vote Score (-3 to +3)
+            # np.tanh maps (total_votes * sensitivity) to a value between -1 and 1
+            # We then scale that by our VOTE_WEIGHT_MAX (3)
+            vote_score = VOTE_WEIGHT_MAX * np.tanh(total_votes * VOTE_SENSITIVITY)
+
+            # 3. Combine scores
+            # Final score will be in a range of (0-7) + (-3 to +3)
+            # A perfect audio match with tons of upvotes will be ~10.
+            # A perfect audio match with tons of downvotes will be ~4.
+            combined_score = audio_score + vote_score
 
             results.append(
-                SimilarSongResult(
-                    id=song["id"],
-                    title=song["title"],
-                    artist_name=song["artist_name"],
-                    url=song["url"],
-                    source_platform=song["source_platform"],
-                    score=score,  # Use 'score'
-                )
+                {
+                    "song": SimilarSongResult(
+                        id=song["id"],
+                        title=song["title"],
+                        artist_name=song["artist_name"],
+                        url=song["url"],
+                        source_platform=song["source_platform"],
+                        score=combined_score,  # Use the new 0-10 scale score
+                    ),
+                    "combined_score": combined_score,
+                }
             )
-        return results
+
+        # Step 5: Re-sort based on the new combined score
+        results.sort(key=lambda x: x["combined_score"], reverse=True)
+
+        # Step 6: Return the top 'limit' songs
+        # The 'score' field in the returned object is now on your 0-10 scale.
+        return [res["song"] for res in results[:limit]]
+
+    def store_user_feedback(
+        self, user_id: int, query_song_id: int, suggested_song_id: int, vote: int
+    ):
+        """Passes feedback from the API to the repository."""
+        if vote not in [1, -1]:
+            raise ValueError("Vote must be 1 (up) or -1 (down)")
+
+        print(
+            f"🔔 Service storing feedback: User {user_id} on {query_song_id} -> {suggested_song_id} ({vote})"
+        )
+        self.repository.store_feedback(user_id, query_song_id, suggested_song_id, vote)
 
     def list_all_songs(self) -> list[SongResult]:
         """

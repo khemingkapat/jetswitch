@@ -53,6 +53,8 @@ func main() {
 	app.Get("/api/music/songs", handlers.ListAllSongs)
 	app.Get("/api/music/songs/:id", handlers.GetSongByID)
 
+	app.Post("/api/music/feedback", middleware.AuthRequired, handlers.HandleMusicFeedback)
+
 	// ML endpoint
 	app.Get("/ml", func(c *fiber.Ctx) error {
 		resp, err := http.Get("http://ml_service:8000")

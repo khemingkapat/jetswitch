@@ -114,3 +114,25 @@ func GetSongByID(songID int) (*models.SongResult, error) {
 
 	return &song, nil
 }
+
+func SendFeedbackToMLService(req models.MLFeedbackRequest) error {
+	url := fmt.Sprintf("%s/feedback", mlServiceBaseURL)
+
+	requestBody, err := json.Marshal(req)
+	if err != nil {
+		return fmt.Errorf("failed to marshal feedback request: %w", err)
+	}
+
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return fmt.Errorf("failed to connect to ML service for feedback: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("ML service feedback error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	return nil
+}

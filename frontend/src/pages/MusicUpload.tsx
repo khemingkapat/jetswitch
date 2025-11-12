@@ -3,6 +3,7 @@ import { Music, Loader2, AlertCircle, Paperclip } from 'lucide-react';
 import SongItem from '../components/SongItem'; // Import the SongItem component
 import FullPageWrapper from '../components/FullPageWrapper'; // Import the wrapper
 import UploadModal from '../components/UploadModal'; // Import the new modal
+import { useAuth } from '../context/AuthContext';
 
 // Main Upload Page Component
 const MusicUploadPage = () => {
@@ -10,6 +11,7 @@ const MusicUploadPage = () => {
 	const [error, setError] = useState('');
 	const [result, setResult] = useState<any>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const { token } = useAuth();
 
 	const handleSubmit = async (url: string, title: string, artistName: string) => {
 		setError('');
@@ -50,16 +52,58 @@ const MusicUploadPage = () => {
 		setError('');
 		// We don't need to reset form fields here, modal state does it
 	};
+	const sendFeedback = async (songId: number, vote: number) => {
+		if (!token) {
+			console.error("No token, cannot send feedback");
+			return;
+		}
+		if (!result || !result.song) {
+			console.error("No query song data, cannot send feedback");
+			return;
+		}
+
+		const querySongId = result.song.id;
+
+		try {
+			const response = await fetch('http://localhost:8080/api/music/feedback', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}` // Send the auth token
+				},
+				body: JSON.stringify({
+					query_song_id: querySongId,
+					suggested_song_id: songId,
+					vote: vote // 1 for up, -1 for down
+				}),
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.error || 'Failed to send feedback');
+			}
+
+			console.log(`Feedback sent: Song ${songId}, Vote ${vote}`);
+			// You could add visual feedback here, like making the button glow
+
+		} catch (err: any) {
+			console.error("Failed to send feedback:", err.message);
+			// Optionally show a small error to the user
+		}
+	};
 
 	const handleThumbsUp = (songId: number) => {
 		console.log('Thumbs up for song:', songId);
-		// Future implementation
+		// --- 4. CALL THE HELPER ---
+		sendFeedback(songId, 1);
 	};
 
 	const handleThumbsDown = (songId: number) => {
 		console.log('Thumbs down for song:', songId);
-		// Future implementation
+		// --- 5. CALL THE HELPER ---
+		sendFeedback(songId, -1);
 	};
+
 
 	// Renders the main content based on state
 	const renderContent = () => {

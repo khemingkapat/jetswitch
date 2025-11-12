@@ -217,3 +217,54 @@ class PGVectorRepository(VectorRepository):
             }
             for row in rows
         ]
+
+    def store_feedback(
+        self, user_id: int, query_song_id: int, suggested_song_id: int, vote: int
+    ) -> None:
+        """
+        Store a user's vote for a song match.
+        Uses ON CONFLICT to update the vote if it already exists (upsert).
+        """
+        with self._connect() as conn, conn.cursor() as cur:
+            try:
+                cur.execute(
+                    """
+                    INSERT INTO SONG_FEEDBACK (user_id, query_song_id, suggested_song_id, vote)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (user_id, query_song_id, suggested_song_id)
+                    DO UPDATE SET vote = EXCLUDED.vote, voted_at = NOW();
+                    """,
+                    (user_id, query_song_id, suggested_song_id, vote),
+                )
+                conn.commit()
+                print(
+                    f"✅ Stored feedback: User {user_id} voted {vote} for song {suggested_song_id}"
+                )
+            except Exception as e:
+                conn.rollback()
+                print(f"❌ Error storing feedback: {e}")
+                raise
+
+    def get_feedback_scores(
+        self, query_song_id: int, suggested_song_ids: List[int]
+    ) -> Dict[int, int]:
+        """
+        Get the aggregate (sum) vote score for a list of suggested songs
+        in the context of a specific query song.
+        """
+        if not suggested_song_ids:
+            return {}
+
+        with self._connect() as conn, conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT suggested_song_id, SUM(vote) as total_score
+                FROM SONG_FEEDBACK
+                WHERE query_song_id = %s AND suggested_song_id = ANY(%s)
+                GROUP BY suggested_song_id;
+                """,
+                (query_song_id, suggested_song_ids),
+            )
+            rows = cur.fetchall()
+
+        return {row[0]: int(row[1]) for row in rows}

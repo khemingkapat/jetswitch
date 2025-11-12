@@ -124,3 +124,43 @@ func GetSongByID(c *fiber.Ctx) error {
 		"song": song,
 	})
 }
+
+func HandleMusicFeedback(c *fiber.Ctx) error {
+	var req models.FeedbackRequest
+
+	// Parse request body
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	// Get user ID from the auth middleware
+	userID, ok := c.Locals("user_id").(int)
+	if !ok {
+		// This should not happen if middleware is applied correctly
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Invalid user session",
+		})
+	}
+
+	// Create the request for the ML service
+	mlReq := models.MLFeedbackRequest{
+		UserID:          userID,
+		QuerySongID:     req.QuerySongID,
+		SuggestedSongID: req.SuggestedSongID,
+		Vote:            req.Vote,
+	}
+
+	// Send to ML service
+	if err := services.SendFeedbackToMLService(mlReq); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":   "Failed to process feedback",
+			"details": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Feedback received",
+	})
+}

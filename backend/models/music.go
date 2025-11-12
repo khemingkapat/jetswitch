@@ -44,3 +44,16 @@ type AnalyzeMusicResponse struct {
 	SimilarSongs []SimilarSong `json:"similar_songs"`
 	Message      string        `json:"message"`
 }
+
+type FeedbackRequest struct {
+	QuerySongID     int `json:"query_song_id"`
+	SuggestedSongID int `json:"suggested_song_id"`
+	Vote            int `json:"vote"`
+}
+
+type MLFeedbackRequest struct {
+	UserID          int `json:"user_id"`
+	QuerySongID     int `json:"query_song_id"`
+	SuggestedSongID int `json:"suggested_song_id"`
+	Vote            int `json:"vote"`
+}

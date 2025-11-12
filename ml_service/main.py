@@ -71,6 +71,15 @@ class AnalyzeResponse(BaseModel):
     message: str
 
 
+class FeedbackRequest(BaseModel):
+    """HTTP request model for /feedback endpoint"""
+
+    user_id: int
+    query_song_id: int
+    suggested_song_id: int
+    vote: int  # 1 for up, -1 for down
+
+
 # ============================================
 # Routes - Thin layer, delegates to service
 # ============================================
@@ -181,4 +190,24 @@ def get_song(song_id: int):
         raise
     except Exception as e:
         print(f"❌ Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/feedback")
+def store_feedback(request: FeedbackRequest):
+    """
+    Store user feedback (thumbs up/down) for a song recommendation.
+    """
+    try:
+        music_service.store_user_feedback(
+            user_id=request.user_id,
+            query_song_id=request.query_song_id,
+            suggested_song_id=request.suggested_song_id,
+            vote=request.vote,
+        )
+        return {"message": "Feedback received successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print(f"❌ Error storing feedback: {e}")
         raise HTTPException(status_code=500, detail=str(e))
