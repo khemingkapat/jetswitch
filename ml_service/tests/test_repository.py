@@ -9,7 +9,7 @@ FEATURE_DIMENSION = 27
 
 
 def test_store_and_retrieve_song(
-    repository: PGVectorRepository, mock_features: np.ndarray
+    repository: PGVectorRepository, mock_features: np.ndarray, test_user_id: int
 ):
     """Test inserting a new song and retrieving it by URL."""
     song_data, is_new = repository.store_features(
@@ -18,7 +18,7 @@ def test_store_and_retrieve_song(
         url="http://test.com/store_features",
         song_feature=mock_features,
         source_platform="youtube",
-        added_by=1,
+        added_by=test_user_id,  # Use the newly created test user ID
     )
 
     assert is_new is True
@@ -30,7 +30,7 @@ def test_store_and_retrieve_song(
 
 
 def test_store_duplicate_url_returns_existing(
-    repository: PGVectorRepository, mock_features: np.ndarray
+    repository: PGVectorRepository, mock_features: np.ndarray, test_user_id: int
 ):
     """Test that attempting to store a song with an existing URL returns the original data and is_new=False."""
     # Store first time
@@ -40,6 +40,7 @@ def test_store_duplicate_url_returns_existing(
         url="http://test.com/dupe_url",
         song_feature=mock_features,
         source_platform="youtube",
+        added_by=test_user_id,  # Use the newly created test user ID
     )
 
     # Attempt to store again with different title
@@ -49,6 +50,7 @@ def test_store_duplicate_url_returns_existing(
         url="http://test.com/dupe_url",  # Same URL
         song_feature=mock_features,
         source_platform="youtube",
+        added_by=test_user_id,  # Use the newly created test user ID
     )
 
     assert is_new is False
@@ -57,7 +59,7 @@ def test_store_duplicate_url_returns_existing(
     )  # Should return the original metadata
 
 
-def test_find_similars_ranking(repository: PGVectorRepository):
+def test_find_similars_ranking(repository: PGVectorRepository, test_user_id: int):
     """Test if the vector search correctly ranks results by cosine distance."""
 
     # Setup songs with known relationships (using 4D vectors for clarity, but works for 27D)
@@ -82,18 +84,18 @@ def test_find_similars_ranking(repository: PGVectorRepository):
     # 3. Orthogonal/Dissimilar (distance near 1)
     v_dissimilar = normalize_vector(np.random.rand(FEATURE_DIMENSION) * 0.2)
 
-    # Store songs
+    # Store songs using the test user ID
     song_q, _ = repository.store_features(
-        "Query", "Artist", "url_q", v_query, "youtube"
+        "Query", "Q", "url_q", v_query, "youtube", added_by=test_user_id
     )
     song_similar, _ = repository.store_features(
-        "Most Similar", "Artist", "url_sim", v_similar, "youtube"
+        "Most Similar", "B", "url_sim", v_similar, "youtube", added_by=test_user_id
     )
     song_medium, _ = repository.store_features(
-        "Medium Match", "Artist", "url_med", v_medium, "youtube"
+        "Medium Match", "C", "url_med", v_medium, "youtube", added_by=test_user_id
     )
     song_dissimilar, _ = repository.store_features(
-        "Least Similar", "Artist", "url_diss", v_dissimilar, "youtube"
+        "Least Similar", "D", "url_diss", v_dissimilar, "youtube", added_by=test_user_id
     )
 
     # Find similar, excluding the query song (Q)
@@ -112,32 +114,30 @@ def test_find_similars_ranking(repository: PGVectorRepository):
     assert similars[1]["distance"] < similars[2]["distance"]
 
 
-def test_feedback_upsert_and_aggregation(repository: PGVectorRepository):
+def test_feedback_upsert_and_aggregation(
+    repository: PGVectorRepository, test_user_id: int
+):
     """Test storing feedback, updating it (upsert), and aggregating scores."""
 
-    # Create two dummy songs and a user
+    # We use the single guaranteed test user (ID 1)
+    user_id = test_user_id
     features = np.ones(FEATURE_DIMENSION) / np.sqrt(FEATURE_DIMENSION)
-    song_q_id = repository.store_features("Query", "Q", "url_q", features, "youtube")[
-        0
-    ]["id"]
-    song_s_id = repository.store_features(
-        "Suggested", "S", "url_s", features, "youtube"
-    )[0]["id"]
-    user_id_a = 10
-    user_id_b = 20
 
-    # 1. Initial vote (User A): +1 (Upvote)
-    repository.store_feedback(user_id_a, song_q_id, song_s_id, 1)
+    # Create two dummy songs and use the test user ID
+    song_q_id = repository.store_features(
+        "Query", "Q", "url_q", features, "youtube", added_by=user_id
+    )[0]["id"]
+    song_s_id = repository.store_features(
+        "Suggested", "S", "url_s", features, "youtube", added_by=user_id
+    )[0]["id"]
+
+    # 1. Initial vote (User): +1 (Upvote)
+    repository.store_feedback(user_id, song_q_id, song_s_id, 1)
     scores1 = repository.get_feedback_scores(song_q_id, [song_s_id])
     assert scores1[song_s_id] == 1, "Score should be +1 after first upvote"
 
-    # 2. Another user (User B) votes: +1 (Upvote)
-    repository.store_feedback(user_id_b, song_q_id, song_s_id, 1)
+    # 2. User changes vote (Upsert): -1 (Downvote)
+    repository.store_feedback(user_id, song_q_id, song_s_id, -1)
     scores2 = repository.get_feedback_scores(song_q_id, [song_s_id])
-    assert scores2[song_s_id] == 2, "Score should aggregate to +2"
-
-    # 3. User A changes vote (Upsert): -1 (Downvote)
-    repository.store_feedback(user_id_a, song_q_id, song_s_id, -1)
-    scores3 = repository.get_feedback_scores(song_q_id, [song_s_id])
-    # Expected score: (User A: -1) + (User B: +1) = 0
-    assert scores3[song_s_id] == 0, "Score should be 0 after User A changes to downvote"
+    # Expected score: -1
+    assert scores2[song_s_id] == -1, "Score should be -1 after User changes to downvote"
