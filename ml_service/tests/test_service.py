@@ -139,7 +139,7 @@ def test_find_similar_by_id_score_re_ranking(
             "artist_name": "Art",
             "url": "urlB",
             "source_platform": "y",
-            "distance": 0.5,
+            "distance": 0.005,
         },  # Sim 0.5
     ]
 
@@ -151,22 +151,20 @@ def test_find_similar_by_id_score_re_ranking(
     mock_repo.find_similars.return_value = mock_raw_similars
     mock_repo.get_feedback_scores.return_value = mock_feedback_scores
 
-    results = mock_service.find_similar_by_id(
-        query_song_id, limit=2, exclude_self=False
-    )
+    results = mock_service.find_similar_by_id(query_song_id, limit=2, exclude_self=True)
 
     # Calculation based on internal service logic:
-    # Score A: (7.0 * 1.0) + (3.0 * tanh(-10 * 0.2)) ≈ 7.0 + (3.0 * -0.379) = 5.86
+    # Score A: (7.0 * 1.0) + (3.0 * tanh(-10 * 0.2)) ≈ 7.0 + (3.0 * -0.379) = 4.1079
     # Score B: (7.0 * 0.5) + (3.0 * tanh(100 * 0.2)) ≈ 3.5 + (3.0 * 1.0) = 6.5
 
-    # Expected ranking by final score: B (6.5) > A (5.86)
+    # Expected ranking by final score: B (6.5) > A (4.1079)
 
     assert results[0].id == candidate_b_id
     assert results[1].id == candidate_a_id
 
     # Use approx for float comparisons
     assert results[0].score == pytest.approx(6.5, abs=0.1)
-    assert results[1].score == pytest.approx(5.86, abs=0.1)
+    assert results[1].score == pytest.approx(4.1079, abs=0.1)
 
 
 def test_store_user_feedback(mock_service: MusicAnalysisService, mock_repo: MagicMock):
