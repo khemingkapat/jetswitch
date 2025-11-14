@@ -79,7 +79,8 @@ func TestRegisterDuplicateUser(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/register", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := app.Test(req)
+	// FIX: Added 3000ms timeout to prevent default 1000ms timeout error
+	resp, err := app.Test(req, 3000)
 	assert.NoError(t, err) // MUST HAVE
 	assert.NotNil(t, resp) // MUST HAVE
 	assert.Equal(t, fiber.StatusBadRequest, resp.StatusCode)
@@ -103,7 +104,8 @@ func TestLoginSuccess(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/login", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := app.Test(req)
+	// FIX: Added 3000ms timeout
+	resp, err := app.Test(req, 3000)
 	assert.NoError(t, err)
 	assert.Equal(t, fiber.StatusOK, resp.StatusCode, "Expected 200 OK for valid login")
 
@@ -130,7 +132,8 @@ func TestLoginFailureWrongPassword(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/login", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, _ := app.Test(req)
+	// FIX: Added 3000ms timeout
+	resp, _ := app.Test(req, 3000)
 	assert.Equal(t, fiber.StatusUnauthorized, resp.StatusCode, "Expected 401 for invalid credentials")
 }
 
@@ -155,7 +158,8 @@ func TestUpdateUserTypeHandlerSuccess(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/update-user-type", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := app.Test(req)
+	// FIX: Added 3000ms timeout
+	resp, err := app.Test(req, 3000)
 	assert.NoError(t, err)
 	assert.Equal(t, fiber.StatusOK, resp.StatusCode, "Expected 200 OK for successful update")
 
