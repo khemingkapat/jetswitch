@@ -13,9 +13,9 @@ MOCK_FEATURES = np.ones(FEATURE_DIMENSION) / np.sqrt(FEATURE_DIMENSION)
 
 
 @pytest.fixture
-def client():
+def client(test_app_client):
     """FastAPI TestClient instance (provided by conftest)."""
-    return TestClient(fast_app)
+    return test_app_client
 
 
 @pytest.fixture
@@ -44,14 +44,16 @@ def test_read_root(client: TestClient):
     assert "JetSwitch" in response.json()["message"]
 
 
-def test_analyze_song_new_success(client: TestClient, repository, mock_external_deps):
-    """Test POST /analyze for a new song creation."""
+def test_analyze_song_new_success(
+    client: TestClient, repository, mock_external_deps, test_user_id
+):
+    """Test POST /analyze for a new song creation. Uses test_user_id for foreign key."""
     request_data = {
         "url": "http://youtube.com/api_test_new",
         "title": "API New Track",
         "artist_name": "API New Artist",
         "source_platform": "youtube",
-        "added_by": 1,
+        "added_by": test_user_id,  # Use the test user ID
     }
 
     response = client.post("/analyze", json=request_data)
@@ -64,7 +66,7 @@ def test_analyze_song_new_success(client: TestClient, repository, mock_external_
 
 
 def test_analyze_song_existing_returns_no_new(
-    client: TestClient, repository, mock_external_deps
+    client: TestClient, repository, mock_external_deps, test_user_id
 ):
     """Test POST /analyze for an existing song returns the old data and is_new=false."""
 
@@ -75,6 +77,7 @@ def test_analyze_song_existing_returns_no_new(
         url="http://youtube.com/api_test_existing",
         song_feature=MOCK_FEATURES,
         source_platform="youtube",
+        added_by=test_user_id,  # Use the test user ID
     )
 
     # 2. Call the API again with the same URL
@@ -83,6 +86,7 @@ def test_analyze_song_existing_returns_no_new(
         "title": "Should Not Store This",
         "artist_name": "Should Not Store This",
         "source_platform": "youtube",
+        "added_by": test_user_id,
     }
     response = client.post("/analyze", json=request_data)
 
@@ -106,22 +110,30 @@ def test_analyze_song_validation_failure(client: TestClient):
     assert response.status_code == 422
 
 
-def test_get_similar_by_id_success(client: TestClient, repository):
+def test_get_similar_by_id_success(client: TestClient, repository, test_user_id):
     """Test GET /similar successfully retrieves results after songs are stored."""
 
     # Setup data with known relation
     v1 = np.ones(FEATURE_DIMENSION) / np.sqrt(FEATURE_DIMENSION)
     v2 = v1 * 0.99
-    v3 = v1 * 0.5
+    v3 = v1 * -0.5
 
-    song1, _ = repository.store_features("Query Song", "A", "url1", v1, "youtube")
-    song2, _ = repository.store_features("Similar", "B", "url2", v2, "youtube")
-    song3, _ = repository.store_features("Less Similar", "C", "url3", v3, "youtube")
+    # Use test_user_id for added_by to satisfy foreign key constraint
+    song1, _ = repository.store_features(
+        "Query Song", "A", "url1", v1, "youtube", added_by=test_user_id
+    )
+    song2, _ = repository.store_features(
+        "Similar", "B", "url2", v2, "youtube", added_by=test_user_id
+    )
+    song3, _ = repository.store_features(
+        "Less Similar", "C", "url3", v3, "youtube", added_by=test_user_id
+    )
 
     response = client.get(f"/similar?id={song1['id']}&limit=2")
 
     assert response.status_code == 200
     results = [SimilarSongResult(**d) for d in response.json()]
+    print(results)
 
     assert len(results) == 2  # Should exclude self
     assert results[0].id == song2["id"]  # Should be most similar
@@ -135,17 +147,18 @@ def test_get_similar_by_id_not_found(client: TestClient):
     assert "not found" in response.json()["detail"]
 
 
-def test_store_feedback_success(client: TestClient, repository):
+def test_store_feedback_success(client: TestClient, repository, test_user_id):
     """Test POST /feedback endpoint successfully stores a vote."""
 
     # Create necessary foreign key constraints in DB
-    user_id = 55
-    song_q_id = repository.store_features("Q", "Q", "url_q", MOCK_FEATURES, "youtube")[
-        0
-    ]["id"]
-    song_s_id = repository.store_features("S", "S", "url_s", MOCK_FEATURES, "youtube")[
-        0
-    ]["id"]
+    user_id = test_user_id
+    # Use test_user_id for added_by to satisfy foreign key constraint
+    song_q_id = repository.store_features(
+        "Q", "Q", "url_q", MOCK_FEATURES, "youtube", added_by=user_id
+    )[0]["id"]
+    song_s_id = repository.store_features(
+        "S", "S", "url_s", MOCK_FEATURES, "youtube", added_by=user_id
+    )[0]["id"]
 
     request_data = {
         "user_id": user_id,
