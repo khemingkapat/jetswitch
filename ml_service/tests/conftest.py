@@ -2,6 +2,7 @@ import pytest
 import psycopg2
 import os
 import numpy as np
+
 from fastapi.testclient import TestClient
 
 # Import the main app instance for API testing
@@ -45,7 +46,8 @@ def repository(pg_conn):
         cursor = pg_conn.cursor()
 
         # Clear tables (order matters for foreign key constraints)
-        tables = [
+        # TRUNCATE CASCADE ensures tables dependent on songs/users are reset safely.
+        tables_to_truncate = [
             "song_feedback",
             "search_history",
             "playlist_songs",
@@ -54,10 +56,10 @@ def repository(pg_conn):
             "tags",
             "contact",
             "contact_info",
-            "users",
             "songs",
+            "users",  # Truncate users to reset IDs for predictability
         ]
-        for table in tables:
+        for table in tables_to_truncate:
             # Use 'TRUNCATE ... RESTART IDENTITY CASCADE;' to reset and clean everything
             cursor.execute(f"TRUNCATE TABLE {table} RESTART IDENTITY CASCADE;")
 
@@ -74,9 +76,36 @@ def repository(pg_conn):
 
 
 @pytest.fixture(scope="function")
+def test_user_id(pg_conn, repository) -> int:
+    """
+    Fixture that ensures a test user exists in the database and returns their ID.
+    Depends on `repository` to ensure tables are cleared first, guaranteeing this user gets ID 1.
+    """
+    cursor = pg_conn.cursor()
+
+    # 1. Insert a test user for foreign key constraints.
+    # password_hash is provided but not used by the ML service.
+    try:
+        cursor.execute(
+            """
+            INSERT INTO users (username, email, password_hash, user_type, auth_provider)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id;
+            """,
+            ("ml_test_user", "ml_test@example.com", "dummyhash123", "artist", "local"),
+        )
+        user_id = cursor.fetchone()[0]
+        pg_conn.commit()
+        return user_id
+    except Exception as e:
+        pytest.fail(f"FATAL: Failed to insert test user for ML service tests: {e}")
+
+
+@pytest.fixture(scope="function")
 def mock_features() -> np.ndarray:
     """Fixture providing a deterministic, normalized 27-dimension feature vector (Unit Test use)."""
     vector = np.ones(FEATURE_DIMENSION)
+    # Normalize for cosine similarity
     return vector / (np.linalg.norm(vector) + 1e-8)
 
 
