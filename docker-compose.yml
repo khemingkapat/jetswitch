@@ -11,6 +11,7 @@ services:
     env_file: ./backend/.env
     depends_on:
       - postgres
+      - postgres_test # Depend on the test DB too, even if not used by default profile
 
   frontend:
     build: ./frontend
@@ -50,6 +51,21 @@ services:
       - "5430:5432"
     restart: unless-stopped
 
+  # --- NEW TEST DATABASE SERVICE ---
+  postgres_test:
+    image: ankane/pgvector:latest
+    container_name: jetswitch_pg_test
+    environment:
+      POSTGRES_DB: jetswitch_test # The new test database name
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      # Use the same initialization script
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5431:5432" # Expose on port 5431 for tests
+    profiles:
+      - test # Only runs when explicitly requested with --profile test
 
   pgadmin:
     image: dpage/pgadmin4
@@ -63,10 +79,9 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
+      - postgres_test # Useful for debugging test data
     restart: unless-stopped
 volumes:
   postgres_data:
   pgadmin_data:
     external: false
-
-
