@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.118.0",
+    "httpx>=0.28.1",
     "librosa>=0.11.0",
     "numpy>=2.3.3",
     "pandas>=2.3.3",
@@ -16,6 +17,14 @@ dependencies = [
     "soundfile>=0.13.1",
     "uvicorn>=0.37.0",
     "yt-dlp>=2025.10.22",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.10.0",
+    "pytest-env>=0.8.1",
 ]
 
 [tool.setuptools]
