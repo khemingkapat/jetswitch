@@ -30,7 +30,7 @@ func LoadConfig() {
 		GoogleRedirectURL:  getEnv("GOOGLE_REDIRECT_URL", "http://localhost:8080/api/auth/google/callback"),
 		JWTSecret:          getEnv("JWT_SECRET", "default-secret-change-this"),
 		DatabaseURL:        getEnv("DATABASE_URL", "postgres://admin:admin@postgres:5432/jetswitch?sslmode=disable"),
-		MLServiceURL:       getEnv("ML_SERVICE_URL","http://localhost:8000"),
+		MLServiceURL:       getEnv("ML_SERVICE_URL", "http://localhost:8000"),
 	}
 }
 
