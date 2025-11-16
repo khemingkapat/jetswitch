@@ -4,9 +4,10 @@ interface FullPageWrapperProps {
 	children: ReactNode;
 	title?: string;
 	useCard?: boolean;
+	onTitleClick?: () => void;
 }
 
-export default function FullPageWrapper({ children, title, useCard = true }: FullPageWrapperProps) {
+export default function FullPageWrapper({ children, title, useCard = true, onTitleClick }: FullPageWrapperProps) {
 	const gradientStyle = {
 		position: 'fixed' as 'fixed',
 		inset: 0,
@@ -42,7 +43,9 @@ export default function FullPageWrapper({ children, title, useCard = true }: Ful
 	};
 
 	const header = title ? (
-		<h1 style={{
+		<h1
+			onClick={onTitleClick}
+			style={{
 			color: '#FF6C6C',
 			fontSize: '2.5em',
 			marginBottom: '20px'

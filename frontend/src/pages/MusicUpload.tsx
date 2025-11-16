@@ -4,6 +4,7 @@ import SongItem from '../components/SongItem'; // Import the SongItem component
 import FullPageWrapper from '../components/FullPageWrapper'; // Import the wrapper
 import UploadModal from '../components/UploadModal'; // Import the new modal
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 // Main Upload Page Component
 const MusicUploadPage = () => {
@@ -12,6 +13,12 @@ const MusicUploadPage = () => {
 	const [result, setResult] = useState<any>(null);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const { token } = useAuth();
+	const navigate = useNavigate();
+
+	const handleTitleClick = () => {
+        // Replace '/dashboard' with the path to your desired landing page
+        navigate('/home');
+    };
 
 	const handleSubmit = async (url: string, title: string, artistName: string) => {
 		setError('');
@@ -199,7 +206,7 @@ const MusicUploadPage = () => {
 	};
 
 	return (
-		<FullPageWrapper useCard={false}>
+		<FullPageWrapper useCard={true} title="JETSWITCH" onTitleClick={handleTitleClick}>
 			<div className="max-w-6xl mx-auto p-8">
 				{/* Header */}
 				<div className="text-center mb-12">
