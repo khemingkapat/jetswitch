@@ -25,6 +25,7 @@ The application is built on a **microservices architecture** using **React** for
 ## **Repository Structure**
 
 The project uses a **Monorepo** structure. Each service is self-contained in its own folder, making it easier for different teams to work in parallel.  
+```
 /jetswitch (project-root)    
 ├── /frontend/            \# Vite \+ React (UI)    
 ├── /backend/             \# Go Core API    
@@ -33,6 +34,7 @@ The project uses a **Monorepo** structure. Each service is self-contained in its
 ├── docker-compose.yml    \# Defines how all services run together    
 ├── .gitignore            \# Files Git should ignore    
 └── README.md             \# This document
+```
 
 ## **4\. Local Development Setup (Developer Guide)**
 
@@ -94,30 +96,33 @@ This process ensures that no unfinished or broken code ever reaches the main bra
 
 * **Goal:** Start a new, clean environment for your work.  
 * **Action:** 1\. Get the latest stable code from main:  
+```
   git checkout main    
   git pull origin main
-
+```
   2. Create your new branch. Use a clear, short name that describes the task (e.g., feature/user-login, feature/music-bar-ui).
-
-  git checkout \-b feature/your-task-name
-
+```
+  git checkout -b feature/your-task-name
+```
   * **All of your coding work happens only in this new branch.**
 
 #### **2\. Commit and Push**
 
 * **Goal:** Save your progress and back up your work to GitHub.  
 * **Action:** 1\. Commit your changes frequently with clear, descriptive messages:  
+```
   git add .    
-  git commit \-m "feat: added basic structure for the login screen"
-
+  git commit -m "feat: added basic structure for the login screen"
+```
   2. Push your branch to GitHub for the first time:
-
-git push \-u origin feature/your-task-name
-
+```
+git push -u origin feature/your-task-name
+```
 #### **3\. Finish and Review (The Pull Request)**
 
 * **Goal:** Get your finished code reviewed and approved to be added to main.  
-* **Action:** 1\. When your feature is complete and fully tested locally, go to GitHub and create a **Pull Request (PR)**.  
+* **Action:** 
+  1\. When your feature is complete and fully tested locally, go to GitHub and create a **Pull Request (PR)**.  
   2\. **Target Branch:** Ensure the PR is set to merge your feature/your-task-name **INTO** the **main** branch.  
   3\. **Review:** Ask at least one teammate to check your code and confirm it works.  
   4\. **Merge:** Once approved, the PR can be merged into main. The feature branch is then deleted.
@@ -127,14 +132,18 @@ git push \-u origin feature/your-task-name
 * **Goal:** To clean up the repository, so we won't end up with repository with hundreds of completed feature branch  
 * **Action:**  
   1. Checkout to main first
-
+```
   git checkout main
-
+```
   2. Delete feature/done-feature branch in local repository
-
-  git branch \-d feature/done-feature  
-     or even force delete it bygit branch \-D feature/done-feature
-
+```
+  git branch -d feature/done-feature
+```
+or even force delete it by
+```
+git branch -D feature/done-feature
+```
   3. Delete feature/done-feature branch in remote repository
-
-git push origin \--delete feature/done-feature  
+```
+git push origin --delete feature/done-feature  
+```
