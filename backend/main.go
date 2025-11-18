@@ -32,7 +32,7 @@ func main() {
 
 	app := fiber.New()
 
-	app.Get("/swagger/*", swagger.HandlerDefault)
+	app.Get("/docs/*", swagger.HandlerDefault)
 	// Middleware
 	app.Use(logger.New())
 	app.Use(cors.New(cors.Config{
