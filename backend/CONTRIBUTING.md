@@ -1,4 +1,4 @@
-# ** Go Backend (Core API) Developer Guide**
+# **Go Backend (Core API) Developer Guide**
 
 This guide details the local setup, contribution guidelines, and testing requirements for the JetSwitch Go Fiber Core API.
 
