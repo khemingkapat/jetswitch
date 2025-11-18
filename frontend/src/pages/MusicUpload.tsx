@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Music, Loader2, AlertCircle, Paperclip } from 'lucide-react';
 import SongItem from '../components/SongItem'; // Import the SongItem component
 import FullPageWrapper from '../components/FullPageWrapper'; // Import the wrapper
-import UploadModal from '../components/UploadModal'; // Import the new modal
+import UploadModel from '../components/UploadModel'; // Import the new modal
 import { useAuth } from '../context/AuthContext';
 
 // Main Upload Page Component
@@ -224,7 +224,7 @@ const MusicUploadPage = () => {
 			</div>
 
 			{/* The Modal */}
-			<UploadModal
+			<UploadModel
 				isOpen={isModalOpen}
 				onClose={() => setIsModalOpen(false)}
 				onSubmit={handleSubmit}
