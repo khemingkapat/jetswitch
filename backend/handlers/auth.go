@@ -11,6 +11,16 @@ import (
 )
 
 // Register handles user registration
+// @Summary Register a new local user
+// @Description Creates a new account, hashes the password, and returns a JWT token.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body models.RegisterRequest true "User registration details"
+// @Success 201 {object} models.AuthResponse "User successfully registered and logged in."
+// @Failure 400 {object} models.ErrorResponse "Invalid inputs, or username/email already exists."
+// @Failure 500 {object} models.ErrorResponse "Internal server error (e.g., failed to hash password or generate token)."
+// @Router /api/auth/register [post]
 func Register(c *fiber.Ctx) error {
 	var req models.RegisterRequest
 
@@ -50,6 +60,17 @@ func Register(c *fiber.Ctx) error {
 }
 
 // Login handles user authentication
+// @Summary Log in a local user
+// @Description Authenticates a user with username and password and returns a JWT token.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body models.LoginRequest true "User login credentials"
+// @Success 200 {object} models.AuthResponse "Login successful."
+// @Failure 400 {object} models.ErrorResponse "Invalid request body."
+// @Failure 401 {object} models.ErrorResponse "Invalid username/password or account uses Google sign-in."
+// @Failure 500 {object} models.ErrorResponse "Internal server error."
+// @Router /api/auth/login [post]
 func Login(c *fiber.Ctx) error {
 	var req models.LoginRequest
 
@@ -82,12 +103,25 @@ func Login(c *fiber.Ctx) error {
 }
 
 // GoogleLogin initiates Google OAuth flow
+// @Summary Initiate Google OAuth
+// @Description Redirects the client to the Google consent screen to begin OAuth process.
+// @Tags Auth
+// @Success 302 {string} string "Redirects to Google"
+// @Router /api/auth/google [get]
 func GoogleLogin(c *fiber.Ctx) error {
 	url := services.GoogleOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	return c.Redirect(url)
 }
 
 // GoogleCallback handles the OAuth callback
+// @Summary Google OAuth Callback
+// @Description Handles the redirect from Google, exchanges the code for a token, and finds/creates the user. Redirects to the frontend with a JWT.
+// @Tags Auth
+// @Param code query string true "Authorization code from Google"
+// @Success 302 {string} string "Redirects to frontend with token in URL (either /auth/callback or /select-user-type)"
+// @Failure 400 {object} models.ErrorResponse "No authorization code provided."
+// @Failure 500 {object} models.ErrorResponse "Failed to exchange token or process user info."
+// @Router /api/auth/google/callback [get]
 func GoogleCallback(c *fiber.Ctx) error {
 	code := c.Query("code")
 	if code == "" {
@@ -146,7 +180,17 @@ func GoogleCallback(c *fiber.Ctx) error {
 	return c.Redirect("http://localhost:5173/auth/callback?token=" + jwtToken)
 }
 
-// UpdateUserType handles updating user type for new Google users
+// UpdateUserTypeHandler handles updating user type for new Google users
+// @Summary Update user type
+// @Description Updates the user's role (listener/artist). Intended for use after OAuth registration.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param request body object{user_id:int, user_type:string} true "User ID and new type ('listener' or 'artist')"
+// @Success 200 {object} models.MessageResponse "User type updated successfully."
+// @Failure 400 {object} models.ErrorResponse "Invalid request body or user type."
+// @Failure 500 {object} models.ErrorResponse "Database error during update."
+// @Router /api/auth/update-user-type [post]
 func UpdateUserTypeHandler(c *fiber.Ctx) error {
 	var req struct {
 		UserID   int    `json:"user_id"`
@@ -171,6 +215,16 @@ func UpdateUserTypeHandler(c *fiber.Ctx) error {
 }
 
 // GetMe returns the current user's information
+// @Summary Get Current User Info
+// @Description Retrieves the authenticated user's details based on the provided JWT.
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} object{models.User} "Current authenticated user details."
+// @Failure 401 {object} models.ErrorResponse "Missing or invalid JWT token."
+// @Failure 404 {object} models.ErrorResponse "User not found in database."
+// @Router /api/auth/me [get]
 func GetMe(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(int)
 

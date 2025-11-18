@@ -1,0 +1,488 @@
+basePath: /
+definitions:
+  models.AnalyzeMusicRequest:
+    properties:
+      added_by:
+        type: integer
+      artist_name:
+        type: string
+      release_date:
+        type: string
+      source_platform:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  models.AnalyzeMusicResponse:
+    properties:
+      message:
+        type: string
+      similar_songs:
+        items:
+          $ref: '#/definitions/models.SimilarSong'
+        type: array
+      song:
+        $ref: '#/definitions/models.SongResult'
+    type: object
+  models.AuthResponse:
+    properties:
+      is_new_user:
+        description: For Google OAuth flow
+        type: boolean
+      message:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.FeedbackRequest:
+    properties:
+      query_song_id:
+        type: integer
+      suggested_song_id:
+        type: integer
+      vote:
+        type: integer
+    type: object
+  models.GetSimilarSongsResponse:
+    properties:
+      count:
+        type: integer
+      similar_songs:
+        items:
+          $ref: '#/definitions/models.SimilarSong'
+        type: array
+    type: object
+  models.GetSongByIDResponse:
+    properties:
+      song:
+        $ref: '#/definitions/models.SongResult'
+    type: object
+  models.ListAllSongsResponse:
+    properties:
+      count:
+        type: integer
+      songs:
+        items:
+          $ref: '#/definitions/models.SongResult'
+        type: array
+    type: object
+  models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.RegisterRequest:
+    properties:
+      confirm_password:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      user_type:
+        type: string
+      username:
+        type: string
+    type: object
+  models.SimilarSong:
+    properties:
+      artist_name:
+        type: string
+      id:
+        type: integer
+      score:
+        type: number
+      source_platform:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  models.SongResult:
+    properties:
+      added_at:
+        type: string
+      added_by:
+        type: integer
+      artist_name:
+        type: string
+      id:
+        type: integer
+      source_platform:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+    type: object
+  models.User:
+    properties:
+      auth_provider:
+        type: string
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      google_id:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      user_type:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the backend API for jetswitch project, handling with most of
+    backend logic and communicate with ML Microservice
+  title: Go Backend API
+paths:
+  /api/auth/google:
+    get:
+      description: Redirects the client to the Google consent screen to begin OAuth
+        process.
+      responses:
+        "302":
+          description: Redirects to Google
+          schema:
+            type: string
+      summary: Initiate Google OAuth
+      tags:
+      - Auth
+  /api/auth/google/callback:
+    get:
+      description: Handles the redirect from Google, exchanges the code for a token,
+        and finds/creates the user. Redirects to the frontend with a JWT.
+      parameters:
+      - description: Authorization code from Google
+        in: query
+        name: code
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Redirects to frontend with token in URL (either /auth/callback
+            or /select-user-type)
+          schema:
+            type: string
+        "400":
+          description: No authorization code provided.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to exchange token or process user info.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Google OAuth Callback
+      tags:
+      - Auth
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with username and password and returns a JWT
+        token.
+      parameters:
+      - description: User login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful.
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+        "400":
+          description: Invalid request body.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Invalid username/password or account uses Google sign-in.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Log in a local user
+      tags:
+      - Auth
+  /api/auth/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the authenticated user's details based on the provided
+        JWT.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Current authenticated user details.
+          schema:
+            type: object
+        "401":
+          description: Missing or invalid JWT token.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: User not found in database.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Current User Info
+      tags:
+      - Auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new account, hashes the password, and returns a JWT token.
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User successfully registered and logged in.
+          schema:
+            $ref: '#/definitions/models.AuthResponse'
+        "400":
+          description: Invalid inputs, or username/email already exists.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal server error (e.g., failed to hash password or generate
+            token).
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Register a new local user
+      tags:
+      - Auth
+  /api/auth/update-user-type:
+    post:
+      consumes:
+      - application/json
+      description: Updates the user's role (listener/artist). Intended for use after
+        OAuth registration.
+      parameters:
+      - description: User ID and new type ('listener' or 'artist')
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User type updated successfully.
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: Invalid request body or user type.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Database error during update.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Update user type
+      tags:
+      - Auth
+  /api/music/analyze:
+    post:
+      consumes:
+      - application/json
+      description: Sends a song URL and metadata to the ML service to extract features,
+        store the song, and retrieve a list of similar tracks.
+      parameters:
+      - description: Song URL and metadata
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.AnalyzeMusicRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Returns the processed song and a list of similar songs.
+          schema:
+            $ref: '#/definitions/models.AnalyzeMusicResponse'
+        "400":
+          description: Required fields are missing or invalid request body.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to communicate with ML service or an internal error
+            occurred during analysis.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Analyze a new track and find similar songs
+      tags:
+      - Music
+  /api/music/feedback:
+    post:
+      consumes:
+      - application/json
+      description: Stores a user's explicit vote (up/down) on a suggested song match.
+      parameters:
+      - description: 'Feedback details (query_song_id, suggested_song_id, vote: 1
+          or -1)'
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FeedbackRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Feedback received.
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "400":
+          description: Invalid request body or invalid vote value.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "401":
+          description: Missing or invalid JWT token.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to communicate with ML service or an internal error
+            occurred.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Store song recommendation feedback
+      tags:
+      - Music
+      - Feedback
+  /api/music/similar:
+    get:
+      consumes:
+      - application/json
+      description: Finds songs in the database similar to a specified track ID.
+      parameters:
+      - description: The ID of the song to search for similarities
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: 'Maximum number of similar songs to return (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      - description: 'Exclude the query song from results (default: true)'
+        in: query
+        name: exclude_self
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A list of similar songs.
+          schema:
+            $ref: '#/definitions/models.GetSimilarSongsResponse'
+        "400":
+          description: Song ID parameter is missing.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to communicate with ML service or an internal error
+            occurred.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Find similar songs by ID
+      tags:
+      - Music
+  /api/music/songs:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all song metadata stored in the database.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: A list of all songs.
+          schema:
+            $ref: '#/definitions/models.ListAllSongsResponse'
+        "500":
+          description: Failed to communicate with ML service or an internal error
+            occurred.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: List all stored songs
+      tags:
+      - Music
+  /api/music/songs/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves metadata for a single song by its ID.
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The requested song metadata.
+          schema:
+            $ref: '#/definitions/models.GetSongByIDResponse'
+        "400":
+          description: Invalid song ID format.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Song not found.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Failed to communicate with ML service or an internal error
+            occurred.
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get a song by ID
+      tags:
+      - Music
+swagger: "2.0"
