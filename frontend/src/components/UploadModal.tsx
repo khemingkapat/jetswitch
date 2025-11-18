@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 
-interface UploadModalProps {
-	isOpen: boolean;
-	onClose: () => void;
-	onSubmit: (url: string, title: string, artistName: string) => void;
-	loading: boolean;
-}
-
-const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, loading }) => {
+// Define the component's props interface
+// For a single-file environment, we define interfaces implicitly via prop usage.
+const UploadModal = ({ isOpen, onClose, onSubmit, loading }) => {
 	const [url, setUrl] = useState('');
 	const [title, setTitle] = useState('');
 	const [artistName, setArtistName] = useState('');
 
-	const handleSubmit = (e: React.FormEvent) => {
+	useEffect(() => {
+        // Reset form fields when modal closes
+        if (!isOpen) {
+            setUrl('');
+            setTitle('');
+            setArtistName('');
+        }
+    }, [isOpen]);
+
+	const handleSubmit = (e) => {
 		e.preventDefault();
 		onSubmit(url, title, artistName);
 	};
@@ -24,17 +28,17 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, lo
 
 	return (
 		// Modal Overlay
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+		<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
 			{/* Modal Content */}
-			<div className="bg-gray-800 text-white rounded-2xl shadow-2xl w-full max-w-md m-4 border border-white/20">
+			<div className="bg-gray-800 text-white rounded-2xl shadow-2xl w-full max-w-md border border-white/20 animate-in fade-in zoom-in-95">
 				<div className="flex items-center justify-between p-6 border-b border-white/10">
-					<h3 className="text-xl font-semibold">Upload Form</h3>
+					<h3 className="text-2xl font-bold text-pink-400">Add New Track</h3>
 					<button
 						onClick={onClose}
-						className="p-2 rounded-full hover:bg-white/10"
+						className="p-2 rounded-full hover:bg-white/10 transition-colors"
 						aria-label="Close modal"
 					>
-						<X className="w-5 h-5" />
+						<X className="w-6 h-6 text-white" />
 					</button>
 				</div>
 
@@ -43,7 +47,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, lo
 						{/* URL Input */}
 						<div>
 							<label className="block text-white/80 font-semibold mb-2">
-								Paste Your Track's Link
+								Paste Your Track's Link (YouTube)
 							</label>
 							<input
 								type="url"
@@ -88,18 +92,18 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, lo
 
 					{/* Modal Footer */}
 					<div className="flex items-center justify-between p-6 border-t border-white/10">
-						<button
+						{/* <button
 							type="button"
 							onClick={onClose}
-							className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center gap-2"
+							className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center gap-2 font-semibold"
 						>
 							<ArrowLeft className="w-4 h-4" />
-							Back
-						</button>
+							Cancel
+						</button> */}
 						<button
 							type="submit"
 							disabled={loading || !url || !title || !artistName}
-							className="px-6 py-2 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+							className="px-6 py-2 bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
 						>
 							{loading ? (
 								<>
@@ -108,7 +112,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, lo
 								</>
 							) : (
 								<>
-									Next
+									Analyze Track
 									<ArrowRight className="w-4 h-4" />
 								</>
 							)}
