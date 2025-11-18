@@ -2,14 +2,15 @@ package services
 
 import (
 	"database/sql"
-    "errors"
-    "time"
+	"errors"
+	"time"
 
-    "github.com/golang-jwt/jwt/v5"
-    "github.com/khemingkapat/jetswitch/backend/config"
-    "github.com/khemingkapat/jetswitch/backend/database"
-    "github.com/khemingkapat/jetswitch/backend/models"
-    "golang.org/x/crypto/bcrypt"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/khemingkapat/jetswitch/backend/config"
+	"github.com/khemingkapat/jetswitch/backend/database"
+	"github.com/khemingkapat/jetswitch/backend/models"
+	"github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // HashPassword creates a bcrypt hash of the password
@@ -43,10 +44,8 @@ func RegisterUser(req models.RegisterRequest) (*models.User, error) {
 		return nil, errors.New("passwords do not match")
 	}
 
-	// --- CHANGE START ---
-	// Default user type to a temporary value, as the role is selected later
-	defaultUserType := "listener" // Default to listener for registration
-	// --- CHANGE END ---
+	// Default user type
+	defaultUserType := "listener"
 
 	// Hash password
 	hashedPassword, err := HashPassword(req.Password)
@@ -67,7 +66,7 @@ func RegisterUser(req models.RegisterRequest) (*models.User, error) {
 		req.Username,
 		req.Email,
 		hashedPassword,
-		defaultUserType, // Use default user type here
+		defaultUserType,
 	).Scan(
 		&user.ID,
 		&user.Username,
@@ -78,7 +77,22 @@ func RegisterUser(req models.RegisterRequest) (*models.User, error) {
 		&user.UpdatedAt,
 	)
 	if err != nil {
-		// Example: Check for duplicate key errors here if desired
+		// Detect duplicate key errors
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" { // unique_violation
+				// Check whether it's username or email
+				switch pqErr.Constraint {
+				case "users_username_key":
+					return nil, errors.New("username already exists")
+				case "users_email_key":
+					return nil, errors.New("email already exists")
+				default:
+					return nil, errors.New("user already exists")
+				}
+			}
+		}
+
+		// Other DB errors
 		return nil, err
 	}
 
