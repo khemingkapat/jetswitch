@@ -1,0 +1,30 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('http://localhost:5173/');
+  await page.getByRole('button', { name: 'JOIN US' }).click();
+  await page.locator('input[name="username"]').click();
+  await page.locator('input[name="username"]').fill('w');
+  await page.locator('input[name="password"]').click();
+  await page.locator('input[name="password"]').fill('wwwwww');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await page.getByRole('button', { name: 'Upload Music' }).click();
+  await expect(page.getByRole('button', { name: 'Upload Track' })).toBeVisible();
+  await page.getByRole('button', { name: 'Upload Track' }).click();
+  await page.getByRole('textbox', { name: 'https://www.youtube.com/watch?v=' }).click();
+  await page.getByRole('textbox', { name: 'https://www.youtube.com/watch?v=' }).fill('https://youtu.be/dTS_aNfpbIM?si=W6gASIjtng5pTxlM');
+  await page.getByRole('textbox', { name: 'Enter song title' }).click();
+  await page.getByRole('textbox', { name: 'Enter song title' }).fill('Chest Pain (I Love)');
+  await page.getByRole('textbox', { name: 'Enter artist name' }).click();
+  await page.getByRole('textbox', { name: 'Enter artist name' }).fill('Malcolm Todd');
+  await page.getByRole('button', { name: 'Analyze' }).click();
+  await expect(page.locator('svg')).toBeVisible();
+  await expect(page.getByText('Extracting...Analyzing your')).toBeVisible();
+  await expect(page.locator('.bg-white\\/10.backdrop-blur-sm').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Thumbs up' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Thumbs down' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Play' }).first()).toBeVisible();
+  await expect(page.getByRole('slider').first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Matching Result' })).toBeVisible();
+  await page.getByRole('button', { name: 'Back' }).click();
+});
