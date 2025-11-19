@@ -89,11 +89,11 @@ const MusicUploadPage = () => {
 		if (loading) {
 			return (
 				<div className="max-w-2xl mx-auto mt-8">
-					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20">
-						<Loader2 className="w-16 h-16 text-pink-400 animate-spin mx-auto mb-4" />
-						<h2 className="text-2xl font-bold text-white mb-2">Extracting...</h2>
-						<p className="text-white/70">Analyzing your track's audio features</p>
-						<div className="mt-6 w-full bg-white/10 rounded-full h-2 overflow-hidden">
+					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[400px] flex flex-col justify-center">
+						<Loader2 className="w-20 h-20 text-pink-400 animate-spin mx-auto mb-6" />
+						<h2 className="text-3xl font-bold text-white mb-3">Extracting...</h2>
+						<p className="text-white/70 text-lg">Analyzing your track's audio features</p>
+						<div className="mt-8 w-full bg-white/10 rounded-full h-3 overflow-hidden max-w-md mx-auto">
 							<div className="h-full bg-gradient-to-r from-pink-400 to-red-400 animate-pulse" style={{ width: '70%' }} />
 						</div>
 					</div>
@@ -154,60 +154,60 @@ const MusicUploadPage = () => {
 		// Upload Form Mode (In the box)
 		if (isUploadMode) {
 			return (
-				<div className="max-w-2xl mx-auto">
-					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-						<h2 className="text-2xl font-semibold text-white/80 mb-6 text-center">Enter Track Details</h2>
-						<form onSubmit={handleSubmit} className="space-y-6 text-left">
+				<div className="max-w-3xl mx-auto">
+					<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-white/20 min-h-[600px] flex flex-col justify-center">
+						<h2 className="text-3xl font-semibold text-white/90 mb-8 text-center">Enter Track Details</h2>
+						<form onSubmit={handleSubmit} className="space-y-8 text-left max-w-xl mx-auto w-full">
 							<div>
-								<label className="block text-white/80 font-semibold mb-2">Track Link</label>
+								<label className="block text-white/90 text-lg font-semibold mb-3">Track Link</label>
 								<input
 									type="url"
 									value={url}
 									onChange={(e) => setUrl(e.target.value)}
 									placeholder="https://www.youtube.com/watch?v=..."
 									required
-									className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400"
+									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 							<div>
-								<label className="block text-white/80 font-semibold mb-2">Title</label>
+								<label className="block text-white/90 text-lg font-semibold mb-3">Title</label>
 								<input
 									type="text"
 									value={title}
 									onChange={(e) => setTitle(e.target.value)}
 									placeholder="Enter song title"
 									required
-									className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400"
+									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 							<div>
-								<label className="block text-white/80 font-semibold mb-2">Artist</label>
+								<label className="block text-white/90 text-lg font-semibold mb-3">Artist</label>
 								<input
 									type="text"
 									value={artistName}
 									onChange={(e) => setArtistName(e.target.value)}
 									placeholder="Enter artist name"
 									required
-									className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400"
+									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 
-							<div className="flex items-center justify-between pt-4 border-t border-white/10">
+							<div className="flex items-center justify-between pt-6 border-t border-white/10">
 								<button
 									type="button"
 									onClick={() => setIsUploadMode(false)}
-									className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all flex items-center gap-2"
+									className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white text-lg rounded-xl transition-all flex items-center gap-2"
 								>
-									<ArrowLeft className="w-4 h-4" />
+									<ArrowLeft className="w-5 h-5" />
 									Back
 								</button>
 								<button
 									type="submit"
 									disabled={!url || !title || !artistName}
-									className="px-6 py-2 bg-white text-red-500 font-bold rounded-lg hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+									className="px-8 py-3 bg-white text-red-500 font-bold text-lg rounded-xl hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 								>
 									Analyze
-									<ArrowRight className="w-4 h-4" />
+									<ArrowRight className="w-5 h-5" />
 								</button>
 							</div>
 						</form>
@@ -218,26 +218,32 @@ const MusicUploadPage = () => {
 
 		// Default State: Initial Upload Button
 		return (
-			<div className="max-w-2xl mx-auto">
-				<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-					<h2 className="text-2xl font-semibold text-gray-200 mb-6 text-center">Upload Seed Track</h2>
+			<div className="max-w-3xl mx-auto">
+				<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/20">
+					<h2 className="text-4xl font-semibold text-gray-200 mb-8 text-center">Upload Seed Track</h2>
 
-					{/* --- NEW WRAPPER BLOCK START --- */}
-					<div className="bg-white/5 rounded-xl p-6 border border-white/10">
-						{/* This wraps the ADD YOUR TRACK box to create the 'block inside' effect */}
+					{/* --- TALLER WRAPPER BLOCK --- */}
+					<div className="bg-white/5 rounded-2xl p-4 sm:p-6 border border-white/10">
+						{/* Increased min-height to 600px to make it "higher" */}
+						<div className="bg-gradient-to-br from-pink-400 to-red-400 rounded-xl w-full min-h-[600px] flex flex-col items-center justify-center border border-white/30 shadow-inner transition-all hover:shadow-lg hover:scale-[1.01]">
 
-						<div className="bg-gradient-to-br from-pink-400 to-red-400 rounded-lg p-12 flex flex-col items-center justify-center border border-white/30 shadow-inner">
-							<h3 className="text-4xl font-bold text-white mb-6">ADD YOUR TRACK</h3>
+							<h3 className="text-5xl md:text-6xl font-bold text-white mb-12 tracking-wide text-center drop-shadow-md">
+								ADD YOUR TRACK
+							</h3>
+
 							<button
 								onClick={() => setIsUploadMode(true)}
-								className="w-24 h-24 bg-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-lg group"
+								className="w-32 h-32 bg-white rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-2xl group"
+								aria-label="Upload Track"
 							>
-								<Paperclip className="w-10 h-10 text-gray-800 group-hover:text-pink-500 transition-colors" />
+								<Paperclip className="w-14 h-14 text-gray-800 group-hover:text-pink-500 transition-colors" />
 							</button>
+
+							<p className="text-white/80 mt-8 text-lg font-medium">Click to paste URL</p>
 						</div>
 
 					</div>
-					{/* --- NEW WRAPPER BLOCK END --- */}
+					{/* --- END WRAPPER BLOCK --- */}
 
 				</div>
 			</div>
@@ -246,13 +252,14 @@ const MusicUploadPage = () => {
 
 	return (
 		<FullPageWrapper useCard={false}>
-			<div className="text-center mb-10 mt-8">
-				<h1 className="text-5xl font-bold mb-2">
+			{/* Header moved to top with margin-top adjusted */}
+			<div className="text-center mb-8 mt-12">
+				<h1 className="text-6xl md:text-7xl font-bold mb-4">
 					<span className="bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent">
 						Find Your Vibe
 					</span>
 				</h1>
-				<p className="text-gray-500 text-lg font-medium">Discover similar music powered by AI</p>
+				<p className="text-gray-400 text-xl md:text-2xl font-medium">Discover similar music powered by AI</p>
 			</div>
 
 			<div
@@ -262,15 +269,16 @@ const MusicUploadPage = () => {
 					width: '95%',
 					margin: '0 auto',
 					padding: '40px',
-					borderRadius: '24px',
+					borderRadius: '32px',
 					boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
 					color: 'white',
+					marginBottom: 'auto' // <--- This prop moves the container to the top
 				}}
 			>
 				{error && !loading && (
-					<div className="flex items-center gap-2 p-4 bg-red-500/20 border border-red-500/50 rounded-lg max-w-2xl mx-auto mb-8">
-						<AlertCircle className="w-5 h-5 text-red-400" />
-						<p className="text-red-200">{error}</p>
+					<div className="flex items-center gap-3 p-5 bg-red-500/20 border border-red-500/50 rounded-xl max-w-2xl mx-auto mb-8">
+						<AlertCircle className="w-6 h-6 text-red-400" />
+						<p className="text-red-200 text-lg">{error}</p>
 					</div>
 				)}
 
