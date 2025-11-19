@@ -9,10 +9,8 @@ const MusicUploadPage = () => {
 	const [error, setError] = useState('');
 	const [result, setResult] = useState<any>(null);
 
-	// State for managing the view mode
 	const [isUploadMode, setIsUploadMode] = useState(false);
 
-	// Form State
 	const [url, setUrl] = useState('');
 	const [title, setTitle] = useState('');
 	const [artistName, setArtistName] = useState('');
@@ -130,7 +128,9 @@ const MusicUploadPage = () => {
 						<div className="flex items-center justify-between mb-6">
 							<h2 className="text-3xl font-bold text-white">Matching Result</h2>
 						</div>
-						<div className="space-y-4 max-h-[340px] overflow-y-auto pr-2 scrollbar-thin">
+
+						{/* UPDATED: replaced max-h-[340px] → max-h-[60vh] */}
+						<div className="space-y-4 max-h-[34vh] overflow-y-auto pr-2 scrollbar-thin">
 							{result.similar_songs && result.similar_songs.length > 0 ? (
 								result.similar_songs.map((song: any) => (
 									<SongItem
@@ -151,11 +151,12 @@ const MusicUploadPage = () => {
 			);
 		}
 
-		// Upload Form Mode (In the box)
 		if (isUploadMode) {
 			return (
 				<div className="max-w-3xl mx-auto">
-					<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-white/20 min-h-[600px] flex flex-col justify-center">
+
+					{/* UPDATED: min-h-[600px] → min-h-[70vh] */}
+					<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-white/20 min-h-[70vh] flex flex-col justify-center">
 						<h2 className="text-3xl font-semibold text-white/90 mb-8 text-center">
 							Enter Track Details
 						</h2>
@@ -227,7 +228,6 @@ const MusicUploadPage = () => {
 			);
 		}
 
-		// Default State: Initial Upload Button
 		return (
 			<div className="max-w-3xl mx-auto">
 				<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/20">
@@ -235,9 +235,8 @@ const MusicUploadPage = () => {
 						Upload Seed Track
 					</h2>
 
-					{/* --- TALLER WRAPPER BLOCK --- */}
 					<div className="bg-white/5 rounded-2xl p-4 sm:p-6">
-						{/* Increased min-height to 600px to make it "higher" */}
+
 						<div className="rounded-xl w-full min-h-[0.5vh] flex flex-col items-center justify-center">
 							<h3 className="text-5xl md:text-6xl font-bold text-white mb-12 tracking-wide text-center drop-shadow-md">
 								Add Your Track
@@ -256,7 +255,6 @@ const MusicUploadPage = () => {
 							</p>
 						</div>
 					</div>
-					{/* --- END WRAPPER BLOCK --- */}
 				</div>
 			</div>
 		);
@@ -264,7 +262,6 @@ const MusicUploadPage = () => {
 
 	return (
 		<FullPageWrapper useCard={false}>
-			{/* Header moved to top with margin-top adjusted */}
 			<div className="text-center mb-8 mt-12">
 				<h1 className="text-6xl md:text-7xl font-bold mb-4">
 					<span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
@@ -296,3 +293,4 @@ const MusicUploadPage = () => {
 };
 
 export default MusicUploadPage;
+
