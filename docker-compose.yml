@@ -11,7 +11,6 @@ services:
     env_file: ./backend/.env
     depends_on:
       - postgres
-      - postgres_test # Depend on the test DB too, even if not used by default profile
 
   frontend:
     build: ./frontend
@@ -79,7 +78,6 @@ services:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       - postgres
-      - postgres_test # Useful for debugging test data
     restart: unless-stopped
 volumes:
   postgres_data:

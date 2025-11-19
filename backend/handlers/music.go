@@ -9,6 +9,16 @@ import (
 )
 
 // AnalyzeMusic handles music analysis and similarity search
+// @Summary Analyze a new track and find similar songs
+// @Description Sends a song URL and metadata to the ML service to extract features, store the song, and retrieve a list of similar tracks.
+// @Tags Music
+// @Accept json
+// @Produce json
+// @Param request body models.AnalyzeMusicRequest true "Song URL and metadata"
+// @Success 200 {object} models.AnalyzeMusicResponse "Returns the processed song and a list of similar songs."
+// @Failure 400 {object} models.ErrorResponse "Required fields are missing or invalid request body."
+// @Failure 500 {object} models.ErrorResponse "Failed to communicate with ML service or an internal error occurred during analysis."
+// @Router /api/music/analyze [post]
 func AnalyzeMusic(c *fiber.Ctx) error {
 	var req models.AnalyzeMusicRequest
 
@@ -57,6 +67,18 @@ func AnalyzeMusic(c *fiber.Ctx) error {
 }
 
 // GetSimilarSongs handles direct similarity search by song ID
+// @Summary Find similar songs by ID
+// @Description Finds songs in the database similar to a specified track ID.
+// @Tags Music
+// @Accept json
+// @Produce json
+// @Param id query int true "The ID of the song to search for similarities"
+// @Param limit query int false "Maximum number of similar songs to return (default: 10)"
+// @Param exclude_self query bool false "Exclude the query song from results (default: true)"
+// @Success 200 {object} models.GetSimilarSongsResponse "A list of similar songs."
+// @Failure 400 {object} models.ErrorResponse "Song ID parameter is missing."
+// @Failure 500 {object} models.ErrorResponse "Failed to communicate with ML service or an internal error occurred."
+// @Router /api/music/similar [get]
 func GetSimilarSongs(c *fiber.Ctx) error {
 	songID := c.QueryInt("id", 0)
 	limit := c.QueryInt("limit", 10)
@@ -83,6 +105,14 @@ func GetSimilarSongs(c *fiber.Ctx) error {
 }
 
 // ListAllSongs retrieves all songs from the ML service
+// @Summary List all stored songs
+// @Description Retrieves all song metadata stored in the database.
+// @Tags Music
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.ListAllSongsResponse "A list of all songs."
+// @Failure 500 {object} models.ErrorResponse "Failed to communicate with ML service or an internal error occurred."
+// @Router /api/music/songs [get]
 func ListAllSongs(c *fiber.Ctx) error {
 	songs, err := services.GetAllSongs()
 	if err != nil {
@@ -99,6 +129,17 @@ func ListAllSongs(c *fiber.Ctx) error {
 }
 
 // GetSongByID retrieves a specific song by ID
+// @Summary Get a song by ID
+// @Description Retrieves metadata for a single song by its ID.
+// @Tags Music
+// @Accept json
+// @Produce json
+// @Param id path int true "Song ID"
+// @Success 200 {object} models.GetSongByIDResponse "The requested song metadata."
+// @Failure 400 {object} models.ErrorResponse "Invalid song ID format."
+// @Failure 404 {object} models.ErrorResponse "Song not found."
+// @Failure 500 {object} models.ErrorResponse "Failed to communicate with ML service or an internal error occurred."
+// @Router /api/music/songs/{id} [get]
 func GetSongByID(c *fiber.Ctx) error {
 	songID, err := c.ParamsInt("id")
 	if err != nil {
@@ -125,6 +166,19 @@ func GetSongByID(c *fiber.Ctx) error {
 	})
 }
 
+// HandleMusicFeedback stores user feedback
+// @Summary Store song recommendation feedback
+// @Description Stores a user's explicit vote (up/down) on a suggested song match.
+// @Tags Music, Feedback
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body models.FeedbackRequest true "Feedback details (query_song_id, suggested_song_id, vote: 1 or -1)"
+// @Success 200 {object} models.MessageResponse "Feedback received."
+// @Failure 400 {object} models.ErrorResponse "Invalid request body or invalid vote value."
+// @Failure 401 {object} models.ErrorResponse "Missing or invalid JWT token."
+// @Failure 500 {object} models.ErrorResponse "Failed to communicate with ML service or an internal error occurred."
+// @Router /api/music/feedback [post]
 func HandleMusicFeedback(c *fiber.Ctx) error {
 	var req models.FeedbackRequest
 
