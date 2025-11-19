@@ -71,17 +71,17 @@ const MusicUploadPage = () => {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${token}`
+					Authorization: `Bearer ${token}`,
 				},
 				body: JSON.stringify({
 					query_song_id: result.song.id,
 					suggested_song_id: songId,
-					vote: vote
+					vote: vote,
 				}),
 			});
 			console.log(`Feedback sent: Song ${songId}, Vote ${vote}`);
 		} catch (err: any) {
-			console.error("Failed to send feedback:", err.message);
+			console.error('Failed to send feedback:', err.message);
 		}
 	};
 
@@ -89,12 +89,17 @@ const MusicUploadPage = () => {
 		if (loading) {
 			return (
 				<div className="max-w-2xl mx-auto mt-8">
-					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[400px] flex flex-col justify-center">
+					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[4000px] flex flex-col justify-center">
 						<Loader2 className="w-20 h-20 text-pink-400 animate-spin mx-auto mb-6" />
 						<h2 className="text-3xl font-bold text-white mb-3">Extracting...</h2>
-						<p className="text-white/70 text-lg">Analyzing your track's audio features</p>
+						<p className="text-white/70 text-lg">
+							Analyzing your track's audio features
+						</p>
 						<div className="mt-8 w-full bg-white/10 rounded-full h-3 overflow-hidden max-w-md mx-auto">
-							<div className="h-full bg-gradient-to-r from-pink-400 to-red-400 animate-pulse" style={{ width: '70%' }} />
+							<div
+								className="h-full bg-gradient-to-r from-pink-400 to-red-400 animate-pulse"
+								style={{ width: '70%' }}
+							/>
 						</div>
 					</div>
 				</div>
@@ -115,13 +120,17 @@ const MusicUploadPage = () => {
 							</button>
 						</div>
 						<div className="bg-gray-800/50 rounded-lg p-6">
-							<h3 className="text-2xl font-bold text-white mb-2">{result.song.title}</h3>
+							<h3 className="text-2xl font-bold text-white mb-2">
+								{result.song.title}
+							</h3>
 							<p className="text-xl text-white/80 mb-4">{result.song.artist_name}</p>
 							<div className="flex gap-2 flex-wrap">
 								<span className="px-3 py-1 bg-pink-500/30 text-white rounded-full text-sm">
 									{result.song.source_platform}
 								</span>
-								<span className="px-3 py-1 bg-white/20 text-white rounded-full text-sm">Rock</span>
+								<span className="px-3 py-1 bg-white/20 text-white rounded-full text-sm">
+									Rock
+								</span>
 							</div>
 						</div>
 					</div>
@@ -136,8 +145,8 @@ const MusicUploadPage = () => {
 									<SongItem
 										key={song.id}
 										song={song}
-										onThumbsUp={(id) => sendFeedback(id, 1)}
-										onThumbsDown={(id) => sendFeedback(id, -1)}
+										onThumbsUp={id => sendFeedback(id, 1)}
+										onThumbsDown={id => sendFeedback(id, -1)}
 									/>
 								))
 							) : (
@@ -156,36 +165,47 @@ const MusicUploadPage = () => {
 			return (
 				<div className="max-w-3xl mx-auto">
 					<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-white/20 min-h-[600px] flex flex-col justify-center">
-						<h2 className="text-3xl font-semibold text-white/90 mb-8 text-center">Enter Track Details</h2>
-						<form onSubmit={handleSubmit} className="space-y-8 text-left max-w-xl mx-auto w-full">
+						<h2 className="text-3xl font-semibold text-white/90 mb-8 text-center">
+							Enter Track Details
+						</h2>
+						<form
+							onSubmit={handleSubmit}
+							className="space-y-8 text-left max-w-xl mx-auto w-full"
+						>
 							<div>
-								<label className="block text-white/90 text-lg font-semibold mb-3">Track Link</label>
+								<label className="block text-white/90 text-lg font-semibold mb-3">
+									Track Link
+								</label>
 								<input
 									type="url"
 									value={url}
-									onChange={(e) => setUrl(e.target.value)}
+									onChange={e => setUrl(e.target.value)}
 									placeholder="https://www.youtube.com/watch?v=..."
 									required
 									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 							<div>
-								<label className="block text-white/90 text-lg font-semibold mb-3">Title</label>
+								<label className="block text-white/90 text-lg font-semibold mb-3">
+									Title
+								</label>
 								<input
 									type="text"
 									value={title}
-									onChange={(e) => setTitle(e.target.value)}
+									onChange={e => setTitle(e.target.value)}
 									placeholder="Enter song title"
 									required
 									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 							<div>
-								<label className="block text-white/90 text-lg font-semibold mb-3">Artist</label>
+								<label className="block text-white/90 text-lg font-semibold mb-3">
+									Artist
+								</label>
 								<input
 									type="text"
 									value={artistName}
-									onChange={(e) => setArtistName(e.target.value)}
+									onChange={e => setArtistName(e.target.value)}
 									placeholder="Enter artist name"
 									required
 									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -220,13 +240,14 @@ const MusicUploadPage = () => {
 		return (
 			<div className="max-w-3xl mx-auto">
 				<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/20">
-					<h2 className="text-4xl font-semibold text-gray-200 mb-8 text-center">Upload Seed Track</h2>
+					<h2 className="text-4xl font-semibold text-gray-200 mb-8 text-center">
+						Upload Seed Track
+					</h2>
 
 					{/* --- TALLER WRAPPER BLOCK --- */}
 					<div className="bg-white/5 rounded-2xl p-4 sm:p-6 border border-white/10">
 						{/* Increased min-height to 600px to make it "higher" */}
 						<div className="bg-gradient-to-br from-pink-400 to-red-400 rounded-xl w-full min-h-[600px] flex flex-col items-center justify-center border border-white/30 shadow-inner transition-all hover:shadow-lg hover:scale-[1.01]">
-
 							<h3 className="text-5xl md:text-6xl font-bold text-white mb-12 tracking-wide text-center drop-shadow-md">
 								ADD YOUR TRACK
 							</h3>
@@ -239,12 +260,12 @@ const MusicUploadPage = () => {
 								<Paperclip className="w-14 h-14 text-gray-800 group-hover:text-pink-500 transition-colors" />
 							</button>
 
-							<p className="text-white/80 mt-8 text-lg font-medium">Click to paste URL</p>
+							<p className="text-white/80 mt-8 text-lg font-medium">
+								Click to paste URL
+							</p>
 						</div>
-
 					</div>
 					{/* --- END WRAPPER BLOCK --- */}
-
 				</div>
 			</div>
 		);
@@ -255,25 +276,28 @@ const MusicUploadPage = () => {
 			{/* Header moved to top with margin-top adjusted */}
 			<div className="text-center mb-8 mt-12">
 				<h1 className="text-6xl md:text-7xl font-bold mb-4">
-					<span className="bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent">
+					<span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
 						Find Your Vibe
 					</span>
 				</h1>
-				<p className="text-gray-400 text-xl md:text-2xl font-medium">Discover similar music powered by AI</p>
+				<p className="text-white/40 text-xl md:text-2xl font-medium">
+					Discover similar music powered by AI
+				</p>
 			</div>
 
 			<div
-				style={{
-					background: 'linear-gradient(180deg, rgba(255, 108, 108, 0.4) 0%, rgba(255, 140, 74, 0.4) 100%)',
-					maxWidth: '1000px',
-					width: '95%',
-					margin: '0 auto',
-					padding: '40px',
-					borderRadius: '32px',
-					boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
-					color: 'white',
-					marginBottom: 'auto' // <--- This prop moves the container to the top
-				}}
+			style={{
+				background:
+					'linear-gradient(180deg, rgba(255, 108, 108, 0.4) 0%, rgba(255, 140, 74, 0.4) 100%)',
+				maxWidth: '1000px',
+				width: '95%',
+				margin: '0 auto',
+				padding: '40px',
+				borderRadius: '32px',
+				boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
+				color: 'white',
+				marginBottom: 'auto', // <--- This prop moves the container to the top
+			}}
 			>
 				{error && !loading && (
 					<div className="flex items-center gap-3 p-5 bg-red-500/20 border border-red-500/50 rounded-xl max-w-2xl mx-auto mb-8">
