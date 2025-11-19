@@ -89,18 +89,12 @@ const MusicUploadPage = () => {
 		if (loading) {
 			return (
 				<div className="max-w-2xl mx-auto mt-8">
-					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[4000px] flex flex-col justify-center">
+					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[1vh] flex flex-col justify-center">
 						<Loader2 className="w-20 h-20 text-pink-400 animate-spin mx-auto mb-6" />
 						<h2 className="text-3xl font-bold text-white mb-3">Extracting...</h2>
 						<p className="text-white/70 text-lg">
 							Analyzing your track's audio features
 						</p>
-						<div className="mt-8 w-full bg-white/10 rounded-full h-3 overflow-hidden max-w-md mx-auto">
-							<div
-								className="h-full bg-gradient-to-r from-pink-400 to-red-400 animate-pulse"
-								style={{ width: '70%' }}
-							/>
-						</div>
 					</div>
 				</div>
 			);
@@ -111,7 +105,7 @@ const MusicUploadPage = () => {
 				<div className="space-y-8">
 					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
 						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-3xl font-bold text-white">Postr Track</h2>
+							<h2 className="text-3xl font-bold text-white">Post Track</h2>
 							<button
 								onClick={handleReset}
 								className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all"
@@ -128,9 +122,6 @@ const MusicUploadPage = () => {
 								<span className="px-3 py-1 bg-pink-500/30 text-white rounded-full text-sm">
 									{result.song.source_platform}
 								</span>
-								<span className="px-3 py-1 bg-white/20 text-white rounded-full text-sm">
-									Rock
-								</span>
 							</div>
 						</div>
 					</div>
@@ -139,7 +130,7 @@ const MusicUploadPage = () => {
 						<div className="flex items-center justify-between mb-6">
 							<h2 className="text-3xl font-bold text-white">Matching Result</h2>
 						</div>
-						<div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
+						<div className="space-y-4 max-h-[340px] overflow-y-auto pr-2 scrollbar-thin">
 							{result.similar_songs && result.similar_songs.length > 0 ? (
 								result.similar_songs.map((song: any) => (
 									<SongItem
@@ -245,11 +236,11 @@ const MusicUploadPage = () => {
 					</h2>
 
 					{/* --- TALLER WRAPPER BLOCK --- */}
-					<div className="bg-white/5 rounded-2xl p-4 sm:p-6 border border-white/10">
+					<div className="bg-white/5 rounded-2xl p-4 sm:p-6">
 						{/* Increased min-height to 600px to make it "higher" */}
-						<div className="bg-gradient-to-br from-pink-400 to-red-400 rounded-xl w-full min-h-[600px] flex flex-col items-center justify-center border border-white/30 shadow-inner transition-all hover:shadow-lg hover:scale-[1.01]">
+						<div className="rounded-xl w-full min-h-[0.5vh] flex flex-col items-center justify-center">
 							<h3 className="text-5xl md:text-6xl font-bold text-white mb-12 tracking-wide text-center drop-shadow-md">
-								ADD YOUR TRACK
+								Add Your Track
 							</h3>
 
 							<button
@@ -285,29 +276,14 @@ const MusicUploadPage = () => {
 				</p>
 			</div>
 
-			<div
-			style={{
-				background:
-					'linear-gradient(180deg, rgba(255, 108, 108, 0.4) 0%, rgba(255, 140, 74, 0.4) 100%)',
-				maxWidth: '1000px',
-				width: '95%',
-				margin: '0 auto',
-				padding: '40px',
-				borderRadius: '32px',
-				boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)',
-				color: 'white',
-				marginBottom: 'auto', // <--- This prop moves the container to the top
-			}}
-			>
-				{error && !loading && (
-					<div className="flex items-center gap-3 p-5 bg-red-500/20 border border-red-500/50 rounded-xl max-w-2xl mx-auto mb-8">
-						<AlertCircle className="w-6 h-6 text-red-400" />
-						<p className="text-red-200 text-lg">{error}</p>
-					</div>
-				)}
+			{error && !loading && (
+				<div className="flex items-center gap-3 p-5 bg-red-500/20 border border-red-500/50 rounded-xl max-w-2xl mx-auto mb-8">
+					<AlertCircle className="w-6 h-6 text-red-400" />
+					<p className="text-red-200 text-lg">{error}</p>
+				</div>
+			)}
 
-				{renderContent()}
-			</div>
+			{renderContent()}
 
 			<style>{`
                 .scrollbar-thin::-webkit-scrollbar { width: 8px; }
