@@ -76,18 +76,16 @@ class MusicAnalysisService:
         exclude_self: bool = True,
     ) -> list[SimilarSongResult]:
         """
-        Find similar songs by song ID, now with 70/30 feedback adjustment.
+        Find similar songs by song ID, now with the distance-based score and
+        negative-only feedback adjustment (max score of 10, min score of 0).
         Returns: A list of similar songs with adjusted scores (0-10 scale).
         """
 
         # --- START: NEW SCORE CONFIGURATION ---
-        AUDIO_WEIGHT_MAX = 7.0  # 70% of the max 10 points
-        VOTE_WEIGHT_MAX = 3.0  # 30% of the max 10 points
-
-        # This new value controls how "fast" the vote score climbs.
-        # A smaller value (e.g., 0.1) requires more votes to reach the max.
-        # A larger value (e.g., 0.5) lets just 2-3 votes dominate.
-        VOTE_SENSITIVITY = 0.2
+        # The score is primarily driven by 10 * (1 - distance).
+        # This value controls how "fast" the negative vote penalty climbs.
+        # A smaller value (e.g., 0.1) requires more downvotes for a large penalty.
+        VOTE_PENALTY_SENSITIVITY = 0.1
         # --- END: NEW SCORE CONFIGURATION ---
 
         # Step 1: Retrieve features
@@ -121,25 +119,33 @@ class MusicAnalysisService:
             if exclude_self and song["id"] == song_id:
                 continue
 
-            distance = song["distance"]
-            audio_similarity = 1 - distance * 100  # Cosine similarity (0.0 to 1.0)
+            distance = song["distance"]  # Cosine Distance (0.0 to 1.0)
 
-            # 1. Calculate Audio Score (0 to 7)
-            audio_score = audio_similarity * AUDIO_WEIGHT_MAX
+            # 1. Calculate Base Score (0 to 10)
+            # Distance=0 (Perfect Match) -> BaseScore=10.0
+            # Distance=1 (Max Distance) -> BaseScore=0.0
+            base_score = 10.0 * (1.0 - distance * 100)
 
-            # Get vote score, default to 0 if no votes
+            # Get vote score (Positive = upvotes, Negative = downvotes)
             total_votes = feedback_scores.get(song["id"], 0)
 
-            # 2. Calculate Vote Score (-3 to +3)
-            # np.tanh maps (total_votes * sensitivity) to a value between -1 and 1
-            # We then scale that by our VOTE_WEIGHT_MAX (3)
-            vote_score = VOTE_WEIGHT_MAX * np.tanh(total_votes * VOTE_SENSITIVITY)
+            # 2. Calculate Penalty Score (>= 0)
+            # Only apply a penalty if total_votes is negative (net downvotes).
+            if total_votes < 0:
+                # np.tanh(abs(total_votes) * sensitivity) results in a value between 0 and 1.
+                # This is scaled up to 10 to represent the maximum possible penalty.
+                penalty = 10.0 * np.tanh(abs(total_votes) * VOTE_PENALTY_SENSITIVITY)
+            else:
+                # If votes are 0 or positive (net upvotes), the penalty is 0.
+                penalty = 0.0
 
             # 3. Combine scores
-            # Final score will be in a range of (0-7) + (-3 to +3)
-            # A perfect audio match with tons of upvotes will be ~10.
-            # A perfect audio match with tons of downvotes will be ~4.
-            combined_score = audio_score + vote_score
+            # Positive feedback (penalty=0) keeps the score at the base_score (max 10).
+            # Negative feedback (penalty>0) reduces the score from the base_score.
+            combined_score = base_score - penalty
+
+            # 4. Enforce the minimum score of 0.
+            combined_score = max(0.0, combined_score)
 
             results.append(
                 {
