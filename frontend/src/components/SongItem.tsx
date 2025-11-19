@@ -100,7 +100,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 	};
 
 	return (
-		<div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/15 transition-all">
+		<div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 hover:bg-gray-700/50 transition-all">
 			{/* Top section (No changes here) */}
 			<div className="flex items-center justify-between mb-3" onClick={stopPropagation}>
 				<div className="flex-1 min-w-0">

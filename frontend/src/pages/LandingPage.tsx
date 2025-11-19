@@ -33,7 +33,11 @@ export default function LandingPage() {
 		}}>
 			<h1 style={{
 				fontSize: '4em',
-				margin: '0 0 10px 0'
+				margin: '0 0 10px 0',
+				color: '#FF6C6C',
+				fontSize: '5em',
+				marginBottom: 20,
+				fontWeight: 'bold'
 			}}>
 				JetSwitch
 			</h1>

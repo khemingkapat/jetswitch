@@ -16,7 +16,11 @@ export default function FullPageWrapper({ children, title, useCard = true }: Ful
 		height: '100%',
 	};
 
-	const header = title ? <h1 className="auth-header">{title}</h1> : null;
+	const header = title ? (
+		<h1 className="auth-header" style={{ fontWeight: 'bold' }}>
+			{title}
+		</h1>
+	) : null;
 
 	const cardContent = (
 		<div className="auth-card">

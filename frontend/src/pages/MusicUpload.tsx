@@ -87,10 +87,10 @@ const MusicUploadPage = () => {
 		if (loading) {
 			return (
 				<div className="max-w-2xl mx-auto mt-8">
-					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[1vh] flex flex-col justify-center">
-						<Loader2 className="w-20 h-20 text-pink-400 animate-spin mx-auto mb-6" />
-						<h2 className="text-3xl font-bold text-white mb-3">Extracting...</h2>
-						<p className="text-white/70 text-lg">
+					<div className="bg-white/75 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20 min-h-[1vh] flex flex-col justify-center">
+						<Loader2 className="w-20 h-20 text-black animate-spin mx-auto mb-6" />
+						<h2 className="text-3xl font-bold text-black mb-3">Extracting...</h2>
+						<p className="text-black/70 text-lg">
 							Analyzing your track's audio features
 						</p>
 					</div>
@@ -101,12 +101,12 @@ const MusicUploadPage = () => {
 		if (result) {
 			return (
 				<div className="space-y-8">
-					<div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+					<div className="bg-white/70 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
 						<div className="flex items-center justify-between mb-4">
-							<h2 className="text-3xl font-bold text-white">Post Track</h2>
+							<h2 className="text-3xl font-bold text-black/75">Post Track</h2>
 							<button
 								onClick={handleReset}
-								className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all"
+								className="px-6 py-2 bg-white/70 hover:bg-black/20 text-black rounded-lg transition-all"
 							>
 								Back
 							</button>
@@ -124,9 +124,9 @@ const MusicUploadPage = () => {
 						</div>
 					</div>
 
-					<div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
+					<div className="bg-white/70 backdrop-blur-lg rounded-2xl p-8 border border-white/10">
 						<div className="flex items-center justify-between mb-6">
-							<h2 className="text-3xl font-bold text-white">Matching Result</h2>
+							<h2 className="text-3xl font-bold text-black">Matching Result</h2>
 						</div>
 
 						{/* UPDATED: replaced max-h-[340px] → max-h-[60vh] */}
@@ -156,8 +156,8 @@ const MusicUploadPage = () => {
 				<div className="max-w-3xl mx-auto">
 
 					{/* UPDATED: min-h-[600px] → min-h-[70vh] */}
-					<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-white/20 min-h-[70vh] flex flex-col justify-center">
-						<h2 className="text-3xl font-semibold text-white/90 mb-8 text-center">
+					<div className="bg-white/75 backdrop-blur-lg rounded-3xl p-10 shadow-2xl border border-white/20 min-h-[60vh] min-w-[45vh] flex flex-col justify-center">
+						<h2 className="text-3xl font-semibold text-black mb-8 text-center">
 							Enter Track Details
 						</h2>
 						<form
@@ -165,7 +165,7 @@ const MusicUploadPage = () => {
 							className="space-y-8 text-left max-w-xl mx-auto w-full"
 						>
 							<div>
-								<label className="block text-white/90 text-lg font-semibold mb-3">
+								<label className="block text-black text-lg font-semibold mb-3">
 									Track Link
 								</label>
 								<input
@@ -174,11 +174,11 @@ const MusicUploadPage = () => {
 									onChange={e => setUrl(e.target.value)}
 									placeholder="https://www.youtube.com/watch?v=..."
 									required
-									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+									className="w-full px-6 py-4 rounded-xl bg-white/75 border text-black placeholder-black/15 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 							<div>
-								<label className="block text-white/90 text-lg font-semibold mb-3">
+								<label className="block text-black text-lg font-semibold mb-3">
 									Title
 								</label>
 								<input
@@ -187,11 +187,11 @@ const MusicUploadPage = () => {
 									onChange={e => setTitle(e.target.value)}
 									placeholder="Enter song title"
 									required
-									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+									className="w-full px-6 py-4 rounded-xl bg-white/75 border text-black placeholder-black/15 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 							<div>
-								<label className="block text-white/90 text-lg font-semibold mb-3">
+								<label className="block text-black text-lg font-semibold mb-3">
 									Artist
 								</label>
 								<input
@@ -200,7 +200,7 @@ const MusicUploadPage = () => {
 									onChange={e => setArtistName(e.target.value)}
 									placeholder="Enter artist name"
 									required
-									className="w-full px-6 py-4 rounded-xl bg-white/10 border border-white/30 text-white placeholder-white/50 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+									className="w-full px-6 py-4 rounded-xl bg-white/75 border text-black placeholder-black/15 text-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
 								/>
 							</div>
 
@@ -208,7 +208,7 @@ const MusicUploadPage = () => {
 								<button
 									type="button"
 									onClick={() => setIsUploadMode(false)}
-									className="px-8 py-3 bg-white/10 hover:bg-white/20 text-white text-lg rounded-xl transition-all flex items-center gap-2"
+									className="px-8 py-3 bg-white text-red-500 font-bold text-lg rounded-xl hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
 								>
 									<ArrowLeft className="w-5 h-5" />
 									Back
@@ -216,7 +216,7 @@ const MusicUploadPage = () => {
 								<button
 									type="submit"
 									disabled={!url || !title || !artistName}
-									className="px-8 py-3 bg-white text-red-500 font-bold text-lg rounded-xl hover:bg-gray-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+									className="px-8 py-3 bg-green-600 text-white font-bold text-lg rounded-xl hover:bg-green-700 transition-all disabled:opacity-100 disabled:cursor-not-allowed flex items-center gap-2"
 								>
 									Analyze
 									<ArrowRight className="w-5 h-5" />
@@ -230,15 +230,15 @@ const MusicUploadPage = () => {
 
 		return (
 			<div className="max-w-3xl mx-auto">
-				<div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/20">
-					<h2 className="text-4xl font-semibold text-gray-200 mb-8 text-center">
-						Upload Seed Track
+				<div className="bg-white/60 backdrop-blur-lg rounded-3xl p-6 sm:p-10 shadow-2xl border border-white/20">
+					<h2 className="text-4xl font-semibold text-black mb-8 text-center">
+						Find Your Vibe🎵
 					</h2>
 
-					<div className="bg-white/5 rounded-2xl p-4 sm:p-6">
+					<div className="bg-white/75 rounded-2xl p-4 sm:p-6">
 
 						<div className="rounded-xl w-full min-h-[0.5vh] flex flex-col items-center justify-center">
-							<h3 className="text-5xl md:text-6xl font-bold text-white mb-12 tracking-wide text-center drop-shadow-md">
+							<h3 className="text-5xl md:text-6xl font-bold text-black mb-12 tracking-wide text-center drop-shadow-md">
 								Add Your Track
 							</h3>
 
@@ -250,7 +250,7 @@ const MusicUploadPage = () => {
 								<Paperclip className="w-14 h-14 text-gray-800 group-hover:text-pink-500 transition-colors" />
 							</button>
 
-							<p className="text-white/80 mt-8 text-lg font-medium">
+							<p className="text-black mt-8 text-lg font-medium">
 								Click to paste URL
 							</p>
 						</div>
@@ -264,11 +264,11 @@ const MusicUploadPage = () => {
 		<FullPageWrapper useCard={false}>
 			<div className="text-center mb-8 mt-12">
 				<h1 className="text-6xl md:text-7xl font-bold mb-4">
-					<span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-						Find Your Vibe
+					<span className="text-white bg-clip-text text-transparent">
+						JETSWITCH
 					</span>
 				</h1>
-				<p className="text-white/40 text-xl md:text-2xl font-medium">
+				<p className="text-white/70 text-xl md:text-2xl font-medium">
 					Discover similar music powered by AI
 				</p>
 			</div>
