@@ -46,7 +46,8 @@ export default function Login() {
 			}
 
 			login(data.token, data.user);
-			navigate('/home', { replace: true });
+			// Redirect to Landing Page ('/') instead of Home ('/home')
+			navigate('/', { replace: true });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Login failed');
 		} finally {
@@ -55,128 +56,55 @@ export default function Login() {
 	};
 
 	return (
-		<FullPageWrapper title="JETSWITCH">
-			<h2 style={{ marginBottom: '25px', color: '#242424' }}>Login</h2>
+		<FullPageWrapper title="JetSwitch">
+			<h2 className="mb-6 text-[#242424]">Login</h2>
 
 			{error && (
-				<div
-					style={{
-						color: 'red',
-						padding: '10px',
-						marginBottom: '15px',
-						border: '1px solid red',
-						borderRadius: '4px',
-					}}
-				>
-					{error}
-				</div>
+				<div className="text-red-500 p-2.5 mb-4 border border-red-500 rounded">{error}</div>
 			)}
 
-			{/* Google Login Button */}
-			<div style={{ marginBottom: '20px' }}>
+			<div className="mb-5">
 				<GoogleLoginButton />
 			</div>
 
-			<div
-				style={{
-					textAlign: 'center',
-					margin: '20px 0',
-					color: '#888',
-					position: 'relative',
-				}}
-			>
-				<span
-					style={{
-						// Background is white from the wrapper, text is black/grey
-						backgroundColor: 'white',
-						padding: '0 10px',
-						position: 'relative',
-						zIndex: 1,
-					}}
-				>
-					OR
-				</span>
-				<div
-					style={{
-						position: 'absolute',
-						top: '50%',
-						left: 0,
-						right: 0,
-						height: '1px',
-						backgroundColor: '#ccc',
-						zIndex: 0,
-					}}
-				/>
+			<div className="text-center my-5 text-[#888] relative">
+				<span className="bg-white px-2.5 relative z-10">OR</span>
+				<div className="absolute top-1/2 left-0 right-0 h-px bg-[#ccc] z-0" />
 			</div>
 
 			<form onSubmit={handleSubmit}>
-				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
-						Username:
-					</label>
+				<div className="form-group">
+					<label className="form-label">Username:</label>
 					<input
 						type="text"
 						name="username"
 						value={formData.username}
 						onChange={handleChange}
 						required
-						style={{
-							width: '100%',
-							padding: '10px',
-							fontSize: '16px',
-							borderRadius: '6px',
-							border: '1px solid #ccc',
-							backgroundColor: 'white',
-							color: '#242424',
-						}}
+						className="form-input"
 					/>
 				</div>
 
-				<div style={{ marginBottom: '20px' }}>
-					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
-						Password:
-					</label>
+				<div className="form-group mb-5">
+					<label className="form-label">Password:</label>
 					<input
 						type="password"
 						name="password"
 						value={formData.password}
 						onChange={handleChange}
 						required
-						style={{
-							width: '100%',
-							padding: '10px',
-							fontSize: '16px',
-							borderRadius: '6px',
-							border: '1px solid #ccc',
-							backgroundColor: 'white',
-							color: '#242424',
-						}}
+						className="form-input"
 					/>
 				</div>
 
-				<button
-					type="submit"
-					disabled={loading}
-					style={{
-						width: '100%',
-						padding: '12px',
-						fontSize: '16px',
-						backgroundColor: loading ? '#ccc' : '#FF6C6C',
-						color: 'white',
-						border: 'none',
-						borderRadius: '6px',
-						cursor: loading ? 'not-allowed' : 'pointer',
-						fontWeight: '600',
-						...{ fontFamily: 'inherit', background: loading ? '#ccc' : '#FF6C6C' },
-					}}
-				>
+				<button type="submit" disabled={loading} className="btn-primary">
 					{loading ? 'Logging in...' : 'Login'}
 				</button>
 			</form>
 
-			<p style={{ marginTop: '20px', textAlign: 'center' }}>
+			<p className="mt-5 text-center">
 				No account?{' '}
-				<Link to="/register" style={{ color: '#FF6C6C', fontWeight: '500' }}>
+				<Link to="/register" className="link-primary">
 					Register here
 				</Link>
 			</p>

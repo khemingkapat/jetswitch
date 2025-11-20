@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
 	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 	line-height: 1.5;
@@ -22,21 +26,20 @@ a:hover {
 	color: #535bf2;
 }
 
-
 body {
 	margin: 0;
 	display: flex;
 	place-content: center;
 	min-width: 100vw;
 	min-height: 100vh;
-    background-color: #242424; /* Ensure outside of gradient is dark */
+	background-color: #242424;
 }
 
 #root {
 	width: 100%;
 	min-height: 100vh;
-    margin: 0;
-    padding: 0;
+	margin: 0;
+	padding: 0;
 }
 h1 {
 	font-size: 3.2em;
@@ -72,5 +75,40 @@ button:focus-visible {
 	}
 	button {
 		background-color: #f9f9f9;
+	}
+}
+
+/* --- Unified Component Styles --- */
+@layer components {
+	.full-page-gradient {
+		@apply fixed inset-0 flex items-center justify-center p-5 overflow-y-auto bg-[linear-gradient(180deg,#EE8555_0%,#F28E88_22%)];
+	}
+
+	.auth-card {
+		@apply bg-white w-full max-w-[450px] p-[30px] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.4)] text-[#242424] text-center mx-auto;
+	}
+
+	.auth-header {
+		@apply text-[#FF6C6C] text-[2.5em] mb-5;
+	}
+
+	.form-group {
+		@apply mb-[15px];
+	}
+
+	.form-label {
+		@apply block mb-[5px] text-left font-normal text-[#242424];
+	}
+
+	.form-input {
+		@apply w-full p-[10px] text-[16px] rounded-md border border-[#ccc] bg-white text-[#242424] focus:outline-none focus:ring-2 focus:ring-[#FF6C6C] focus:border-transparent;
+	}
+
+	.btn-primary {
+		@apply w-full p-[12px] text-[16px] bg-[#FF6C6C] text-white border-none rounded-md font-semibold cursor-pointer transition-colors hover:bg-[#ff5252] disabled:bg-[#ccc] disabled:cursor-not-allowed;
+	}
+
+	.link-primary {
+		@apply text-[#FF6C6C] font-medium hover:underline;
 	}
 }

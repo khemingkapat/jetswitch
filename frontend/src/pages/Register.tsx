@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import GoogleLoginButton from '../components/GoogleLoginButton';
-import FullPageWrapper from '../components/FullPageWrapper'; // Ensure this is imported
+import FullPageWrapper from '../components/FullPageWrapper';
 
-// Get the API base URL from the environment
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export default function Register() {
@@ -21,7 +20,7 @@ export default function Register() {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 		setFormData({
 			...formData,
-			[e.target.name]: e.target.value
+			[e.target.name]: e.target.value,
 		});
 	};
 
@@ -31,7 +30,6 @@ export default function Register() {
 		setLoading(true);
 
 		try {
-			// POST data without user_type
 			const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
 				method: 'POST',
 				headers: {
@@ -46,9 +44,7 @@ export default function Register() {
 				throw new Error(data.error || 'Registration failed');
 			}
 
-			// SUCCESS: Now navigate to the role selection page, passing the token
 			navigate(`/select-user-type?token=${data.token}`);
-
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Registration failed');
 		} finally {
@@ -57,105 +53,49 @@ export default function Register() {
 	};
 
 	return (
-		// 1. WRAP THE ENTIRE COMPONENT WITH FULLPAGEWRAPPER
 		<FullPageWrapper title="JETSWITCH">
-			<h2 style={{ marginBottom: '25px', color: '#242424' }}>Register</h2> {/* Text inside the card is black */}
+			<h2 className="mb-6 text-[#242424]">Register</h2>
 
 			{error && (
-				<div style={{
-					color: 'red',
-					padding: '10px',
-					marginBottom: '15px',
-					border: '1px solid red',
-					borderRadius: '4px'
-				}}>
-					{error}
-				</div>
+				<div className="text-red-500 p-2.5 mb-4 border border-red-500 rounded">{error}</div>
 			)}
 
-			{/* Google Login Button */}
-			<div style={{ marginBottom: '20px' }}>
+			<div className="mb-5">
 				<GoogleLoginButton />
 			</div>
 
-			<div style={{
-				textAlign: 'center',
-				margin: '20px 0',
-				color: '#888',
-				position: 'relative'
-			}}>
-				<span style={{
-					// Background color is white (from FullPageWrapper card)
-					backgroundColor: 'white',
-					padding: '0 10px',
-					position: 'relative',
-					zIndex: 1
-				}}>
-					OR
-				</span>
-				<div style={{
-					position: 'absolute',
-					top: '50%',
-					left: 0,
-					right: 0,
-					height: '1px',
-					backgroundColor: '#ccc',
-					zIndex: 0
-				}} />
+			<div className="text-center my-5 text-[#888] relative">
+				<span className="bg-white px-2.5 relative z-10">OR</span>
+				<div className="absolute top-1/2 left-0 right-0 h-px bg-[#ccc] z-0" />
 			</div>
 
 			<form onSubmit={handleSubmit}>
-				{/* Username */}
-				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
-						Username:
-					</label>
+				<div className="form-group">
+					<label className="form-label">Username:</label>
 					<input
 						type="text"
 						name="username"
 						value={formData.username}
 						onChange={handleChange}
 						required
-						style={{
-							width: '100%',
-							padding: '10px',
-							fontSize: '16px',
-							borderRadius: '6px',
-							border: '1px solid #ccc',
-							backgroundColor: 'white',
-							color: '#242424'
-						}}
+						className="form-input"
 					/>
 				</div>
 
-				{/* Email */}
-				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
-						Email:
-					</label>
+				<div className="form-group">
+					<label className="form-label">Email:</label>
 					<input
 						type="email"
 						name="email"
 						value={formData.email}
 						onChange={handleChange}
 						required
-						style={{
-							width: '100%',
-							padding: '10px',
-							fontSize: '16px',
-							borderRadius: '6px',
-							border: '1px solid #ccc',
-							backgroundColor: 'white',
-							color: '#242424'
-						}}
+						className="form-input"
 					/>
 				</div>
 
-				{/* Password */}
-				<div style={{ marginBottom: '15px' }}>
-					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
-						Password:
-					</label>
+				<div className="form-group">
+					<label className="form-label">Password:</label>
 					<input
 						type="password"
 						name="password"
@@ -163,23 +103,12 @@ export default function Register() {
 						onChange={handleChange}
 						required
 						minLength={6}
-						style={{
-							width: '100%',
-							padding: '10px',
-							fontSize: '16px',
-							borderRadius: '6px',
-							border: '1px solid #ccc',
-							backgroundColor: 'white',
-							color: '#242424'
-						}}
+						className="form-input"
 					/>
 				</div>
 
-				{/* Confirm Password */}
-				<div style={{ marginBottom: '20px' }}>
-					<label style={{ display: 'block', marginBottom: '5px', textAlign: 'left' }}>
-						Confirm Password:
-					</label>
+				<div className="form-group mb-5">
+					<label className="form-label">Confirm Password:</label>
 					<input
 						type="password"
 						name="confirm_password"
@@ -187,42 +116,18 @@ export default function Register() {
 						onChange={handleChange}
 						required
 						minLength={6}
-						style={{
-							width: '100%',
-							padding: '10px',
-							fontSize: '16px',
-							borderRadius: '6px',
-							border: '1px solid #ccc',
-							backgroundColor: 'white',
-							color: '#242424'
-						}}
+						className="form-input"
 					/>
 				</div>
 
-				<button
-					type="submit"
-					disabled={loading}
-					style={{
-						width: '100%',
-						padding: '12px',
-						fontSize: '16px',
-						backgroundColor: loading ? '#ccc' : '#FF6C6C',
-						color: 'white',
-						border: 'none',
-						borderRadius: '6px',
-						cursor: loading ? 'not-allowed' : 'pointer',
-						fontWeight: '600',
-						// Ensure button styles are correct
-						...{ fontFamily: 'inherit', background: loading ? '#ccc' : '#FF6C6C' }
-					}}
-				>
+				<button type="submit" disabled={loading} className="btn-primary">
 					{loading ? 'Creating Account...' : 'Register'}
 				</button>
 			</form>
 
-			<p style={{ marginTop: '20px', textAlign: 'center' }}>
+			<p className="mt-5 text-center">
 				Already have an account?{' '}
-				<Link to="/login" style={{ color: '#FF6C6C', fontWeight: '500' }}>
+				<Link to="/login" className="link-primary">
 					Login here
 				</Link>
 			</p>

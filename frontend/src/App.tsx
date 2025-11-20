@@ -16,25 +16,13 @@ function ProtectedRoute({ children }: WithChildren): JSX.Element {
 	return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
-function RedirectIfAuthed({ children }: WithChildren): JSX.Element {
-	const { isAuthenticated } = useAuth();
-	return isAuthenticated ? <Navigate to="/home" replace /> : children;
-}
-
 export default function App(): JSX.Element {
 	return (
 		<AuthProvider>
 			<BrowserRouter>
 				<Routes>
-					{/* Public landing — if logged in, push to /home */}
-					<Route
-						path="/"
-						element={
-							<RedirectIfAuthed>
-								<LandingPage />
-							</RedirectIfAuthed>
-						}
-					/>
+					{/* Public landing — displays different views based on auth state */}
+					<Route path="/" element={<LandingPage />} />
 
 					{/* Auth-only Home */}
 					<Route

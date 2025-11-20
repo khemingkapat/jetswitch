@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { X, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 
-interface UploadModalProps {
+interface UploadModelProps {
 	isOpen: boolean;
 	onClose: () => void;
 	onSubmit: (url: string, title: string, artistName: string) => void;
 	loading: boolean;
 }
 
-const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, loading }) => {
+const UploadModel: React.FC<UploadModelProps> = ({ isOpen, onClose, onSubmit, loading }) => {
 	const [url, setUrl] = useState('');
 	const [title, setTitle] = useState('');
 	const [artistName, setArtistName] = useState('');
@@ -120,4 +120,4 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose, onSubmit, lo
 	);
 };
 
-export default UploadModal;
+export default UploadModel;

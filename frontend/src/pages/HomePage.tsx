@@ -48,7 +48,7 @@ export default function HomePage(): JSX.Element {
 				role="region"
 				aria-label="Home Dashboard"
 			>
-				<h1 style={{ color: '#FF6C6C', fontSize: '2.5em', marginBottom: 20 }}>JETSWITCH</h1>
+				<h1 style={{ color: '#FF6C6C', fontSize: '2.5em', marginBottom: 20, fontWeight: 'bold' }}>JETSWITCH</h1>
 				<h2 style={{ margin: '0 0 15px' }}>
 					Welcome back{user?.username ? `, ${user.username}` : ''}!
 				</h2>
