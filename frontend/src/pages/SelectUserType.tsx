@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FullPageWrapper from '../components/FullPageWrapper';
 
 // Get the API base URL from the environment (defaulting to localhost for local testing)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -66,7 +67,8 @@ export default function SelectUserType() {
 
 			// Log in with updated user type
 			login(token, userData.user);
-			navigate('/home', { replace: true });
+			// Redirect to Landing Page ('/') instead of Home ('/home')
+			navigate('/', { replace: true });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to finalize registration.');
 		} finally {
@@ -76,109 +78,123 @@ export default function SelectUserType() {
 
 	if (!token) {
 		return (
-			<div style={{ textAlign: 'center', marginTop: '100px', color: 'white' }}>
-				<h2>Error</h2>
-				<p>No authentication token found. Please try logging in again.</p>
-				<button onClick={() => navigate('/login')}>Go to Login</button>
-			</div>
+			<FullPageWrapper useCard={false}>
+				<div style={{ textAlign: 'center', color: 'white' }}>
+					<h2>Error</h2>
+					<p>No authentication token found. Please try logging in again.</p>
+					<button
+						onClick={() => navigate('/login')}
+						style={{
+							marginTop: '20px',
+							padding: '10px 20px',
+							borderRadius: '8px',
+							border: 'none',
+							cursor: 'pointer'
+						}}
+					>
+						Go to Login
+					</button>
+				</div>
+			</FullPageWrapper>
 		);
 	}
 
 	return (
-		<div style={{
-			// Apply gradient background similar to design
-			background: 'linear-gradient(180deg, #ff6c6c 0%, #ff8c4a 100%)',
-			maxWidth: '550px',
-			margin: '100px auto',
-			padding: '40px',
-			borderRadius: '12px',
-			boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
-			color: 'white'
-		}}>
-			<h2 style={{ textAlign: 'center', marginBottom: '15px' }}>JETSWITCH</h2>
-			<h3 style={{ textAlign: 'center', marginBottom: '30px' }}>
-				What best describe you?
-			</h3>
-
-			{error && (
-				<div style={{
-					color: 'white',
-					padding: '10px',
-					marginBottom: '20px',
-					border: '1px solid white',
-					borderRadius: '4px',
-					textAlign: 'center',
-					backgroundColor: 'rgba(255, 0, 0, 0.2)'
-				}}>
-					{error}
-				</div>
-			)}
-
+		<FullPageWrapper useCard={false}>
 			<div style={{
-				marginBottom: '30px',
-				display: 'flex',
-				gap: '20px',
-				justifyContent: 'center'
+				width: '100%',
+				maxWidth: '550px',
+				padding: '40px',
+				backgroundColor: 'rgba(255, 255, 255, 0.1)',
+				backdropFilter: 'blur(10px)',
+				borderRadius: '12px',
+				boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+				color: 'white'
 			}}>
-				{/* Listener Card */}
-				<div
-					onClick={() => setUserType('listener')}
-					style={{
-						padding: '20px',
-						flex: 1,
-						border: `2px solid ${userType === 'listener' ? '#2196F3' : '#fff'}`,
-						borderRadius: '12px',
-						cursor: 'pointer',
-						backgroundColor: userType === 'listener' ? 'rgba(33, 150, 243, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-						transition: 'all 0.3s',
-						textAlign: 'center'
-					}}
-				>
-					<h3 style={{ margin: '0 0 10px 0', color: 'white' }}>🎧 Listener</h3>
-					<p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
-						I want to discover new music and find songs similar to my favorites.
-					</p>
+				<h2 style={{ textAlign: 'center', marginBottom: '15px', fontSize: '2.5em', fontWeight: 'bold' }}>JETSWITCH</h2>
+				<h3 style={{ textAlign: 'center', marginBottom: '30px', fontSize: '1.5em' }}>
+					What best describes you?
+				</h3>
+
+				{error && (
+					<div style={{
+						color: 'white',
+						padding: '10px',
+						marginBottom: '20px',
+						border: '1px solid white',
+						borderRadius: '4px',
+						textAlign: 'center',
+						backgroundColor: 'rgba(255, 0, 0, 0.2)'
+					}}>
+						{error}
+					</div>
+				)}
+
+				<div style={{
+					marginBottom: '30px',
+					display: 'flex',
+					flexDirection: 'column',
+					gap: '20px',
+					justifyContent: 'center'
+				}}>
+					{/* Listener Card */}
+					<div
+						onClick={() => setUserType('listener')}
+						style={{
+							padding: '20px',
+							border: `2px solid ${userType === 'listener' ? '#fff' : 'transparent'}`,
+							borderRadius: '12px',
+							cursor: 'pointer',
+							backgroundColor: userType === 'listener' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+							transition: 'all 0.3s',
+							textAlign: 'center'
+						}}
+					>
+						<h3 style={{ margin: '0 0 10px 0', color: 'white', fontSize: '1.2em' }}>🎧 Listener</h3>
+						<p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.9)', fontSize: '14px' }}>
+							I want to discover new music and find songs similar to my favorites.
+						</p>
+					</div>
+
+					{/* Artist Card */}
+					<div
+						onClick={() => setUserType('artist')}
+						style={{
+							padding: '20px',
+							border: `2px solid ${userType === 'artist' ? '#fff' : 'transparent'}`,
+							borderRadius: '12px',
+							cursor: 'pointer',
+							backgroundColor: userType === 'artist' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)',
+							transition: 'all 0.3s',
+							textAlign: 'center'
+						}}
+					>
+						<h3 style={{ margin: '0 0 10px 0', color: 'white', fontSize: '1.2em' }}>🎤 Artist</h3>
+						<p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.9)', fontSize: '14px' }}>
+							I create music and want to upload my tracks and find collaborators.
+						</p>
+					</div>
 				</div>
 
-				{/* Artist Card */}
-				<div
-					onClick={() => setUserType('artist')}
+				<button
+					onClick={handleSubmit}
+					disabled={loading}
 					style={{
-						padding: '20px',
-						flex: 1,
-						border: `2px solid ${userType === 'artist' ? '#2196F3' : '#fff'}`,
-						borderRadius: '12px',
-						cursor: 'pointer',
-						backgroundColor: userType === 'artist' ? 'rgba(33, 150, 243, 0.2)' : 'rgba(0, 0, 0, 0.2)',
-						transition: 'all 0.3s',
-						textAlign: 'center'
+						width: '100%',
+						padding: '14px',
+						fontSize: '16px',
+						backgroundColor: loading ? '#ccc' : 'white',
+						color: loading ? '#666' : '#FF6C6C',
+						border: 'none',
+						borderRadius: '8px',
+						cursor: loading ? 'not-allowed' : 'pointer',
+						fontWeight: 'bold',
+						transition: 'transform 0.1s',
 					}}
 				>
-					<h3 style={{ margin: '0 0 10px 0', color: 'white' }}>🎤 Artist</h3>
-					<p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.8)', fontSize: '14px' }}>
-						I create music and want to upload my tracks and find collaborators.
-					</p>
-				</div>
+					{loading ? 'Continuing...' : 'Continue'}
+				</button>
 			</div>
-
-			<button
-				onClick={handleSubmit}
-				disabled={loading}
-				style={{
-					width: '100%',
-					padding: '12px',
-					fontSize: '16px',
-					backgroundColor: loading ? '#ccc' : '#2196F3',
-					color: 'white',
-					border: 'none',
-					borderRadius: '6px',
-					cursor: loading ? 'not-allowed' : 'pointer',
-					fontWeight: '600'
-				}}
-			>
-				{loading ? 'Continuing...' : 'Continue'}
-			</button>
-		</div>
+		</FullPageWrapper>
 	);
 }
-
