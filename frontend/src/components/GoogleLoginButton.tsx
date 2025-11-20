@@ -4,9 +4,11 @@ interface GoogleLoginButtonProps {
 	onSuccess?: () => void;
 }
 
+const API_BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:8080"
+
 export default function GoogleLoginButton({ onSuccess }: GoogleLoginButtonProps) {
 	const handleGoogleLogin = () => {
-		window.location.href = 'http://localhost:8080/api/auth/google';
+		window.location.href = `${API_BASE_URL}/api/auth/google`;
 	};
 
 	return (

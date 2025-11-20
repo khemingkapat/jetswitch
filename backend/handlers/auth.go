@@ -7,6 +7,7 @@ import (
 	"github.com/khemingkapat/jetswitch/backend/database"
 	"github.com/khemingkapat/jetswitch/backend/models"
 	"github.com/khemingkapat/jetswitch/backend/services"
+	"github.com/khemingkapat/jetswitch/backend/config"
 	"golang.org/x/oauth2"
 )
 
@@ -174,10 +175,10 @@ func GoogleCallback(c *fiber.Ctx) error {
 	// Redirect to frontend with token
 	// If new user, redirect to user type selection page
 	if isNewUser {
-		return c.Redirect("http://localhost:5173/select-user-type?token=" + jwtToken)
+		return c.Redirect(config.AppConfig.FrontendURL + "/select-user-type?token=" + jwtToken)
 	}
 
-	return c.Redirect("http://localhost:5173/auth/callback?token=" + jwtToken)
+	return c.Redirect(config.AppConfig.FrontendURL + "/auth/callback?token=" + jwtToken)
 }
 
 // UpdateUserTypeHandler handles updating user type for new Google users

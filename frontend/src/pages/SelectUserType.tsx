@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import FullPageWrapper from '../components/FullPageWrapper';
 
 // Get the API base URL from the environment (defaulting to localhost for local testing)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.API_BASE_URL || 'http://localhost:8080';
 
 export default function SelectUserType() {
 	const navigate = useNavigate();
