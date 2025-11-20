@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// FIX: Ensure correct path based on your folder structure if you moved pages/components
 import FullPageWrapper from '../components/FullPageWrapper';
 
 export default function LandingPage() {
@@ -32,10 +31,13 @@ export default function LandingPage() {
 			color: 'white',
 		}}>
 			<h1 style={{
-				fontSize: '4em',
-				margin: '0 0 10px 0'
+				margin: '0 0 10px 0',
+				color: '#FFFFFF',
+				fontSize: '5em',
+				marginBottom: 20,
+				fontWeight: 'bold'
 			}}>
-				JetSwitch
+				JETSWITCH
 			</h1>
 			<p style={{
 				fontSize: '1.2em',
@@ -48,22 +50,15 @@ export default function LandingPage() {
 				display: 'flex',
 				justifyContent: 'center',
 				alignItems: 'center',
-				gap: '20px' // space between buttons
+				gap: '20px'
 			}}>
-				<Link to="/upload">
+				{/* Redirects to Login if not authenticated */}
+				<Link to="/login">
 					<button style={primaryButtonStyle}>
 						Get Started
 					</button>
 				</Link>
-
-				<Link to="/login">
-					<button style={primaryButtonStyle}>
-						JOIN US
-					</button>
-				</Link>
 			</div>
-
-
 		</div>
 	);
 
@@ -80,28 +75,41 @@ export default function LandingPage() {
 			textAlign: 'center',
 			margin: 'auto',
 		}}>
-			<h1 style={{ color: '#FF6C6C', fontSize: '2.5em', marginBottom: '20px' }}>
+			<h1 style={{ color: '#FF6C6C', fontSize: '2.5em', marginBottom: '20px', fontWeight: 'bold' }}>
 				JETSWITCH
 			</h1>
 			<h2 style={{ margin: '0 0 15px 0' }}>Welcome back, {user?.username}!</h2>
 			<p>You are logged in as {user?.user_type}.</p>
 			<p>Ready to discover music.</p>
-			<button onClick={logout} style={{
-				...buttonStyle,
-				backgroundColor: '#535bf2',
-				color: 'white',
-				background: '#535bf2'
-			}}>
-				LOGOUT
-			</button>
+
+			<div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '25px' }}>
+				{/* Redirects to Upload if authenticated */}
+				<Link to="/upload">
+					<button style={{
+						...buttonStyle,
+						backgroundColor: '#FF6C6C',
+						color: 'white',
+						width: '100%'
+					}}>
+						Get Started
+					</button>
+				</Link>
+
+				<button onClick={logout} style={{
+					...buttonStyle,
+					backgroundColor: '#535bf2',
+					color: 'white',
+					width: '100%'
+				}}>
+					LOGOUT
+				</button>
+			</div>
 		</div>
 	);
 
 	return (
-		// The wrapper handles the full-screen gradient and centering
 		<FullPageWrapper useCard={false}>
 			{isAuthenticated ? <AuthenticatedView /> : <GuestView />}
 		</FullPageWrapper>
 	);
 }
-

@@ -46,7 +46,8 @@ export default function Login() {
 			}
 
 			login(data.token, data.user);
-			navigate('/home', { replace: true });
+			// Redirect to Landing Page ('/') instead of Home ('/home')
+			navigate('/', { replace: true });
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Login failed');
 		} finally {
@@ -55,7 +56,7 @@ export default function Login() {
 	};
 
 	return (
-		<FullPageWrapper title="JETSWITCH">
+		<FullPageWrapper title="JetSwitch">
 			<h2 className="mb-6 text-[#242424]">Login</h2>
 
 			{error && (

@@ -1,0 +1,32 @@
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('http://localhost:5173/');
+  await page.getByRole('button', { name: 'Get Started' }).click();
+  await page.getByRole('link', { name: 'Register here' }).click();
+  await page.locator('input[name="username"]').click();
+  await page.locator('input[name="username"]').fill('bb');
+  await page.locator('input[name="email"]').click();
+  await page.locator('input[name="email"]').fill('bb@gmail.com');
+  await page.locator('input[name="email"]').press('Tab');
+  await page.locator('input[name="password"]').fill('bbbbbb');
+  await page.locator('input[name="password"]').press('Tab');
+  await page.locator('input[name="confirm_password"]').fill('bbbbbb');
+  await page.getByRole('button', { name: 'Register' }).click();
+  await expect(page.getByRole('heading', { name: '🎧 Listener' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '🎤 Artist' })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText('You are logged in as listener.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Get Started' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'LOGOUT' })).toBeVisible();
+  await page.getByRole('button', { name: 'LOGOUT' }).click();
+  await page.getByRole('button', { name: 'Get Started' }).click();
+  await page.locator('input[name="username"]').click();
+  await page.locator('input[name="username"]').fill('bb');
+  await page.locator('input[name="password"]').click();
+  await page.locator('input[name="password"]').fill('bbbbbb');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page.getByRole('heading', { name: 'JETSWITCH' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Get Started' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'LOGOUT' })).toBeVisible();
+});
