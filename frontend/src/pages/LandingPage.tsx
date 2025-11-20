@@ -37,7 +37,7 @@ export default function LandingPage() {
 				marginBottom: 20,
 				fontWeight: 'bold'
 			}}>
-				JetSwitch
+				JETSWITCH
 			</h1>
 			<p style={{
 				fontSize: '1.2em',
@@ -76,7 +76,7 @@ export default function LandingPage() {
 			margin: 'auto',
 		}}>
 			<h1 style={{ color: '#FF6C6C', fontSize: '2.5em', marginBottom: '20px', fontWeight: 'bold' }}>
-				JetSwitch
+				JETSWITCH
 			</h1>
 			<h2 style={{ margin: '0 0 15px 0' }}>Welcome back, {user?.username}!</h2>
 			<p>You are logged in as {user?.user_type}.</p>

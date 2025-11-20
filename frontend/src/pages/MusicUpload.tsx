@@ -238,7 +238,7 @@ const MusicUploadPage = () => {
 					<div className="bg-white/75 rounded-2xl p-4 sm:p-6">
 
 						<div className="rounded-xl w-full min-h-[0.5vh] flex flex-col items-center justify-center">
-							<h3 className="text-5xl md:text-6xl font-bold text-black mb-12 tracking-wide text-center drop-shadow-md">
+							<h3 className="text-5xl font-bold text-black mb-12 tracking-wide text-center drop-shadow-md">
 								Add Your Track
 							</h3>
 
