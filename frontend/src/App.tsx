@@ -8,15 +8,16 @@ import LandingPage from './pages/LandingPage';
 import HomePage from './pages/HomePage';
 import './App.css';
 import MusicUploadPage from './pages/MusicUpload';
+import React from 'react'
 
-type WithChildren = { children: JSX.Element };
+type WithChildren = { children: React.JSX.Element };
 
-function ProtectedRoute({ children }: WithChildren): JSX.Element {
+function ProtectedRoute({ children }: WithChildren): React.JSX.Element {
 	const { isAuthenticated } = useAuth();
 	return isAuthenticated ? children : <Navigate to="/" replace />;
 }
 
-export default function App(): JSX.Element {
+export default function App(): React.JSX.Element {
 	return (
 		<AuthProvider>
 			<BrowserRouter>

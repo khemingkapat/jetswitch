@@ -27,7 +27,7 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 	const [playing, setPlaying] = useState(false);
 	const [played, setPlayed] = useState(0);       // Fraction 0 to 1
 	const [seeking, setSeeking] = useState(false);
-	const [duration, setDuration] = useState(0);     // Duration in seconds
+	const [_, setDuration] = useState(0);     // Duration in seconds
 
 	const playerRef = useRef<HTMLVideoElement>(null);
 
@@ -90,14 +90,14 @@ const SongItem: React.FC<SongItemProps> = ({ song, onThumbsUp, onThumbsDown }) =
 	};
 
 	// This function is no longer used, but we can keep it for future use
-	const formatTime = (seconds: number) => {
-		if (isNaN(seconds) || seconds === 0) return '0:00';
-		const date = new Date(seconds * 1000);
-		const ss = date.getUTCSeconds().toString().padStart(2, '0');
-		const mm = date.getUTCMinutes().toString().padStart(2, '0');
-		const hh = date.getUTCHours();
-		return hh ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`;
-	};
+	// const formatTime = (seconds: number) => {
+	// 	if (isNaN(seconds) || seconds === 0) return '0:00';
+	// 	const date = new Date(seconds * 1000);
+	// 	const ss = date.getUTCSeconds().toString().padStart(2, '0');
+	// 	const mm = date.getUTCMinutes().toString().padStart(2, '0');
+	// 	const hh = date.getUTCHours();
+	// 	return hh ? `${hh}:${mm}:${ss}` : `${mm}:${ss}`;
+	// };
 
 	return (
 		<div className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 hover:bg-gray-700/50 transition-all">

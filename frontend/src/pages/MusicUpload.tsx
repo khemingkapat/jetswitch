@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Music, Loader2, AlertCircle, Paperclip, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, AlertCircle, Paperclip, ArrowRight, ArrowLeft } from 'lucide-react';
 import SongItem from '../components/SongItem';
 import FullPageWrapper from '../components/FullPageWrapper';
 import { useAuth } from '../context/AuthContext';
