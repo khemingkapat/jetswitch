@@ -1,2 +1,4 @@
 [build]
-builder="dockerfile"
+builder = "DOCKERFILE"
+dockerfilePath = "/frontend/Dockerfile"
+
