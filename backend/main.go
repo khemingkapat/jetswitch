@@ -59,7 +59,6 @@ func main() {
 	app.Get("/api/music/songs/:id", handlers.GetSongByID)
 	app.Post("/api/music/feedback", middleware.AuthRequired, handlers.HandleMusicFeedback)
 
-	log.Println("Server is running on http://localhost:8080")
 	if err := app.Listen(":8080"); err != nil {
 		log.Fatal(err)
 	}
