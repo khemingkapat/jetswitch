@@ -15,12 +15,8 @@ RUN npm run build
 # --- Serve Build Stage ---
 FROM nginx:alpine
 
-# The original content copied everything.
-# We explicitly copy the new custom config file over the default NGINX one.
-# It is important that 'nginx.conf' is in the same directory as the Dockerfile (frontend/).
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
 COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD sh -c "sed -i \"s|%%VITE_API_BASE_URL%%|$VITE_API_BASE_URL|g\" /usr/share/nginx/html/env.js && nginx -g 'daemon off;'"
+

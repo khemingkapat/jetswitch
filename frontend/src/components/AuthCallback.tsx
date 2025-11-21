@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"
+const API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL || "http://localhost:8080";
 
 export default function AuthCallback() {
 	const navigate = useNavigate();
