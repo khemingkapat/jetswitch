@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Music, Loader2, AlertCircle, Paperclip, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Loader2, AlertCircle, Paperclip, ArrowRight, ArrowLeft } from 'lucide-react';
 import SongItem from '../components/SongItem';
 import FullPageWrapper from '../components/FullPageWrapper';
 import { useAuth } from '../context/AuthContext';
+
+const API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL || "http://localhost:8080";
 
 const MusicUploadPage = () => {
 	const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ const MusicUploadPage = () => {
 		setLoading(true);
 
 		try {
-			const response = await fetch('http://localhost:8080/api/music/analyze', {
+			const response = await fetch(`${API_BASE_URL}/api/music/analyze`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -65,7 +67,7 @@ const MusicUploadPage = () => {
 		if (!token || !result?.song) return;
 
 		try {
-			await fetch('http://localhost:8080/api/music/feedback', {
+			await fetch(`${API_BASE_URL}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',

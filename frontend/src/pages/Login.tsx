@@ -5,7 +5,7 @@ import GoogleLoginButton from '../components/GoogleLoginButton';
 import FullPageWrapper from '../components/FullPageWrapper';
 
 // Get the API base URL from the environment
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL || "http://localhost:8080";
 
 export default function Login() {
 	const navigate = useNavigate();

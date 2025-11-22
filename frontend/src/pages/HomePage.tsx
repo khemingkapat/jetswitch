@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import FullPageWrapper from '../components/FullPageWrapper';
 import { Link } from 'react-router-dom'; // Import Link to create navigation
 
-export default function HomePage(): JSX.Element {
+export default function HomePage(): React.JSX.Element {
 	const { user, logout } = useAuth();
 
 	const btn: React.CSSProperties = {

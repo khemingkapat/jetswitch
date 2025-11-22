@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL || "http://localhost:8080";
+
 export default function AuthCallback() {
 	const navigate = useNavigate();
 	const { login } = useAuth();
@@ -18,7 +20,7 @@ export default function AuthCallback() {
 				const payload = JSON.parse(window.atob(base64));
 
 				// Fetch full user data from backend
-				fetch('http://localhost:8080/api/auth/me', {
+				fetch(`${API_BASE_URL}/auth/me`, {
 					headers: {
 						'Authorization': `Bearer ${token}`
 					}

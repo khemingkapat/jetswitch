@@ -200,7 +200,6 @@ class MusicAnalysisService:
     # ============================================
     # Private helper methods
     # ============================================
-
     def _download_audio(self, url: str) -> str:
         """Download audio from a given URL using yt_dlp."""
         tempdir = tempfile.mkdtemp()
@@ -219,6 +218,13 @@ class MusicAnalysisService:
             "quiet": True,
             "noprogress": True,
         }
+
+        # --- NEW SECURE COOKIE LOGIC ---
+        cookies_file = os.environ.get("COOKIES_FILE")
+        if cookies_file:
+            print(f"🍪 Using cookies file: {cookies_file}")
+            ydl_opts["cookiefile"] = cookies_file
+        # -------------------------------
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)

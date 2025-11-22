@@ -1,12 +1,9 @@
-import { useEffect } from 'react';
+const API_BASE_URL = window.__APP_CONFIG__?.API_BASE_URL || "http://localhost:8080";
 
-interface GoogleLoginButtonProps {
-	onSuccess?: () => void;
-}
 
-export default function GoogleLoginButton({ onSuccess }: GoogleLoginButtonProps) {
+export default function GoogleLoginButton() {
 	const handleGoogleLogin = () => {
-		window.location.href = 'http://localhost:8080/api/auth/google';
+		window.location.href = `${API_BASE_URL}/api/auth/google`;
 	};
 
 	return (

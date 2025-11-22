@@ -19,8 +19,9 @@ RUN uv sync --frozen --no-dev
 # Copy app source
 COPY . .
 
+RUN if [ -n "$SECRET_COOKIES" ]; then echo "$SECRET_COOKIES" > /app/yt_cookies.txt; fi
+
 EXPOSE 8000
 
 # Run FastAPI app
 CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-
