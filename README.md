@@ -50,13 +50,16 @@ You must create environment variable files in two service folders (/backend and 
 | backend/ | .env | DATABASE_URL, JWT_SECRET, ML_SERVICE_URL, GOOGLE_CLIENT_ID, etc. |
 | ml_service/ | .env | DATABASE_DSN |
 
-**Note**: Don't forget to rename "\backend\.env.example" and "\ml_service\.env.example" into -> "\.env"
+**Note**: Don't forget to rename "\backend\.env.example" and "\ml_service\.env.example"
+into -> "\.env"
+
 and put secret id,key in "\backend\.env" otherwise google register/login not work
-GOOGLE_CLIENT_ID=<your-google-client-id>
-GOOGLE_CLIENT_SECRET=<your-google-client-secret>
-JWT_SECRET=<your-jwt-secret-key>
-DB_USER=<user, admin if you using in docker>
-DB_PASSWORD=<user, admin if you using in docker>
+
+| GOOGLE_CLIENT_ID=<your-google-client-id> |
+| GOOGLE_CLIENT_SECRET=<your-google-client-secret> |
+| JWT_SECRET=<your-jwt-secret-key> |
+| DB_USER=<user, admin if you using in docker> |
+| DB_PASSWORD=<user, admin if you using in docker> |
 
 ### **How to Run (Recommended: Docker Compose)**
 
