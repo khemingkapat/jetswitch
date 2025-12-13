@@ -16,7 +16,7 @@ The application is built on a **microservices architecture** using **React** for
 
 ### **Live Deployment**
 
-The application is currently deployed and running at: [here](https://react-frontend-production-9bec.up.railway.app/)
+The application is currently deployed and running at [here](https://react-frontend-production-9bec.up.railway.app/)
 
 ## **1. Local Development Setup**
 
