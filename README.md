@@ -55,12 +55,11 @@ into -> "\.env"
 
 and put secret id,key in "\backend\.env" otherwise google register/login not work
 
-| :---- | :---- | :---- |
-| GOOGLE_CLIENT_ID=<your-google-client-id> |
-| GOOGLE_CLIENT_SECRET=<your-google-client-secret> |
-| JWT_SECRET=<your-jwt-secret-key> |
-| DB_USER=<user, admin if you using in docker> |
-| DB_PASSWORD=<user, admin if you using in docker> |
+``` GOOGLE_CLIENT_ID=<your-google-client-id> ```
+``` GOOGLE_CLIENT_SECRET=<your-google-client-secret> ```
+``` JWT_SECRET=<your-jwt-secret-key> ```
+``` DB_USER=<user, admin if you using in docker> ```
+``` DB_PASSWORD=<user, admin if you using in docker> ```
 
 ### **How to Run (Recommended: Docker Compose)**
 
